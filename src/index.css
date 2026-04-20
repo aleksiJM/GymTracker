@@ -1,0 +1,61 @@
+/* Base */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, sans-serif;
+  background-color: #222222;
+  color: #fff;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* App shell */
+.app {
+  margin: 0 auto;
+  min-height: 100vh;
+  background-color: #323232;
+  position: relative;
+}
+
+.main-content {
+  padding-bottom: 4.5rem;
+}
+
+/* Navbar */
+.navbar {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  background-color: #323232;
+  border-top: 0.0625rem solid #e4e4e7;
+  display: flex;
+}
+
+.nav-btn {
+  flex: 1;
+  padding: 0.75rem 0;
+  border: none;
+  border-top: 0.125rem solid transparent;
+  background: none;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #ffffff;
+  transition: color 0.15s;
+}
+
+.nav-btn.active {
+  color: #16a34a;
+  border-top-color: #16a34a;
+}
+
+/* Page padding */
+.page {
+  padding: 1.5rem;
+}
