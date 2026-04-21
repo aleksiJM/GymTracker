@@ -3,7 +3,6 @@ import Navbar from './components/Navbar'
 import History from './pages/History'
 import LogWorkout from './pages/LogWorkout'
 import Progress from './pages/Progress'
-import './App.css'
 
 function App() {
   const [page, setPage] = useState('history')
