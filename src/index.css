@@ -1,6 +1,9 @@
 :root {
   --color-background: #323232;
-  --color-select: #16a34a;
+  --color-select: #10330f;
+  --color-positive: #38ff83;
+  --color-negative: #ff3636;
+  --color-card: #232323;
 }
 
 /* Base */
@@ -58,8 +61,8 @@ body {
 }
 
 .nav-btn.active {
-  color: var(--color-select);
-  border-top-color: var(--color-select);
+  color: #50ff50;
+  border-top-color: #50ff50;
 }
 
 /* Page padding */
@@ -93,7 +96,7 @@ body {
 }
 
 .stat-card {
-  background-color: var(--color-background);
+  background-color: var(--color-card);
   border: 0.0625rem solid #e4e4e7;
   border-radius: 0.75rem;
   padding: 1rem;
@@ -107,11 +110,11 @@ body {
 }
 
 .stat-card-value.positive {
-  color: #16a34a;
+  color: var(--color-positive);
 }
 
 .stat-card-value.negative {
-  color: #dc2626;
+  color: var(--color-negative);
 }
 
 .stat-card-label {
@@ -135,7 +138,7 @@ body {
 }
 
 .workout-card {
-  background-color: var(--color-background);
+  background-color: var(--color-card);
   border: 0.0625rem solid #e4e4e7;
   border-radius: 0.75rem;
   padding: 0.875rem 1rem;
@@ -199,7 +202,7 @@ body {
   width: 100%;
   max-width: 430px;
   height: 100vh;
-  background-color: #323232;
+  background-color: var(--color-background);
   z-index: 100;
   transition: transform 0.3s ease;
   overflow-y: auto;
@@ -217,7 +220,7 @@ body {
   border-bottom: 0.0625rem solid #e4e4e7;
   position: sticky;
   top: 0;
-  background-color: #323232;
+  background-color: var(--color-background);
 }
 
 
@@ -226,7 +229,7 @@ body {
   border: none;
   cursor: pointer;
   font-size: 1.25rem;
-  color: #16a34a;
+  color: #50ff50;
   padding: 0;
   line-height: 1;
 }
@@ -257,6 +260,7 @@ body {
 }
 
 .exercise-list {
+  background-color: var(--color-card);
   border: 0.0625rem solid #e4e4e7;
   border-radius: 0.75rem;
   overflow: hidden;
@@ -289,5 +293,5 @@ body {
 .exercise-weight {
   font-size: 0.9375rem;
   font-weight: 500;
-  color: #16a34a;
+  color: var(--color-positive);
 }

@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import WorkoutCard from '../components/WorkoutCard'
+import WorkoutDetail from '../components/WorkoutDetail'
 
 const mockStats = {
   overload: 4.2,
@@ -10,7 +12,6 @@ const mockWorkouts = [
     id: 1,
     name: 'Push day',
     date: 'Today',
-    duration: 52,
     tags: [
       { label: 'Chest', type: 'push' },
       { label: 'Shoulders', type: 'push' },
@@ -29,7 +30,6 @@ const mockWorkouts = [
     id: 2,
     name: 'Pull day',
     date: 'Yesterday',
-    duration: 48,
     tags: [
       { label: 'Back', type: 'pull' },
       { label: 'Biceps', type: 'pull' },
@@ -46,7 +46,6 @@ const mockWorkouts = [
     id: 3,
     name: 'Leg day',
     date: 'Thu',
-    duration: 60,
     tags: [
       { label: 'Quads', type: 'legs' },
       { label: 'Hamstrings', type: 'legs' },
@@ -64,7 +63,6 @@ const mockWorkouts = [
     id: 4,
     name: 'Push day',
     date: 'Tue',
-    duration: 50,
     tags: [
       { label: 'Chest', type: 'push' },
       { label: 'Shoulders', type: 'push' },
@@ -101,7 +99,7 @@ export default function History() {
           <div className="stat-card-label">Avg progressive overload</div>
         </div>
         <div className="stat-card">
-          <div className={`stat-card-value ${bodyweightPositive ? 'negative' : 'positive'}`}>
+          <div className={`stat-card-value ${bodyweightPositive ? 'positive' : 'negative'}`}>
             {bodyweightPositive ? '+' : ''}{mockStats.bodweightChange.toFixed(1)} kg
           </div>
           <div className="stat-card-label">Bodyweight change this week</div>
@@ -111,65 +109,18 @@ export default function History() {
       <div className="workout-list">
         <div className="workout-list-title">Sessions</div>
         {mockWorkouts.map(workout => (
-          <div
+          <WorkoutCard
             key={workout.id}
-            className="workout-card"
+            workout={workout}
             onClick={() => setSelectedWorkout(workout)}
-          >
-            <div className="workout-card-header">
-              <span className="workout-card-name">{workout.name}</span>
-              <span className="workout-card-date">{workout.date}</span>
-            </div>
-            <div className="workout-card-tags">
-              {workout.tags.map(tag => (
-                <span key={tag.label} className={`tag tag-${tag.type}`}>
-                  {tag.label}
-                </span>
-              ))}
-            </div>
-            <div className="workout-card-meta">
-              {workout.exercises.length} exercises · {workout.duration} min
-            </div>
-          </div>
+          />
         ))}
       </div>
 
-      <div className={`detail-panel ${selectedWorkout ? 'open' : ''}`}>
-        {selectedWorkout && (
-          <>
-            <div className="detail-header">
-              <button
-                className="detail-back-btn"
-                onClick={() => setSelectedWorkout(null)}
-              >
-                {'\u2192'}
-              </button>
-              <span className="detail-title">{selectedWorkout.name}</span>
-            </div>
-            <div className="detail-body">
-              <div className="detail-meta">
-                {selectedWorkout.date} · {selectedWorkout.duration} min
-              </div>
-              <div className="detail-section-title">Exercises</div>
-              <div className="exercise-list">
-                {selectedWorkout.exercises.map(exercise => (
-                  <div key={exercise.name} className="exercise-item">
-                    <div>
-                      <div className="exercise-name">{exercise.name}</div>
-                      <div className="exercise-sets">
-                        {exercise.sets} sets × {exercise.reps} reps
-                      </div>
-                    </div>
-                    <div className="exercise-weight">
-                      {exercise.weight > 0 ? `${exercise.weight} kg` : 'Bodyweight'}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </>
-        )}
-      </div>
+      <WorkoutDetail
+        workout={selectedWorkout}
+        onClose={() => setSelectedWorkout(null)}
+      />
     </>
   )
 }
