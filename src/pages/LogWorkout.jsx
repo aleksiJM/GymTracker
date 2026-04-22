@@ -202,7 +202,13 @@ export default function LogWorkout() {
         .limit(5)
     }
 
-    if (updatedWorkouts) setRecentWorkout(updatedWorkouts)
+    const { data: updatedWorkouts } = await supabase
+      .from('workouts')
+      .select(`*, exercises (*, sets (*), exercise_muscles (*))`)
+      .order('created_at', { ascending: false })
+      .limit(8)
+
+    if (updatedWorkouts) setRecentWorkouts(updatedWorkouts)
     setActiveWorkout(null)
   }
 
