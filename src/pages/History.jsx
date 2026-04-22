@@ -94,13 +94,13 @@ export default function History() {
       <div className="stat-grid">
         <div className="stat-card">
           <div className={`stat-card-value ${overloadPositive ? 'positive' : 'negative'}`}>
-            {overloadPositive ? '+ ' : ''}{mockStats.overload.toFixed(1)} %
+            {overloadPositive ? '+ ' : '- '}{Math.abs(mockStats.overload).toFixed(1)} %
           </div>
           <div className="stat-card-label">Avg progressive overload</div>
         </div>
         <div className="stat-card">
           <div className={`stat-card-value ${bodyweightPositive ? 'positive' : 'negative'}`}>
-            {bodyweightPositive ? '+ ' : ''}{mockStats.bodweightChange.toFixed(1)} kg
+            {bodyweightPositive ? '+ ' : '- '}{Math.abs(mockStats.bodweightChange).toFixed(1)} kg
           </div>
           <div className="stat-card-label">Bodyweight change this week</div>
         </div>

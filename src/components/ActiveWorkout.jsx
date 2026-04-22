@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 function ExerciseBlock({ exercise, onChange, onRemove }) {
   const updateSet = (index, field, value) => {
@@ -43,10 +43,20 @@ function ExerciseBlock({ exercise, onChange, onRemove }) {
   )
 }
 
-export default function ActiveWorkout({ workoutName, initialExercises = [], onSave, onCancel }) {
+export default function ActiveWorkout({ workoutName, initialExercises = [], onSave, onCancel, isOpen }) {
   const [exercises, setExercises] = useState(initialExercises)
   const [exerciseName, setExerciseName] = useState('')
   const [setCount, setSetCount] = useState(3)
+  const lastWorkoutName = useRef(workoutName)
+
+  useEffect(() => {
+    if (isOpen) {
+        setExercises(initialExercises)
+        setExerciseName('')
+        setSetCount(3)
+        lastWorkoutName.current = workoutName
+    }
+  }, [isOpen])
 
   const addExercise = () => {
     if (!exerciseName.trim()) return
@@ -79,46 +89,48 @@ export default function ActiveWorkout({ workoutName, initialExercises = [], onSa
   }
 
   return (
-    <div className="active-workout">
-      <div className="active-workout-header">
-        <button className="detail-back-btn" onClick={onCancel}>{'\u2192'}</button>
-        <span className="active-workout-title">{workoutName}</span>
-      </div>
+    <div className={`active-workout-panel ${isOpen ? 'open' : ''}`}>
+        <div className="active-workout">
+        <div className="active-workout-header">
+            <button className="detail-back-btn" onClick={onCancel}>{'\u2192'}</button>
+            <span className="active-workout-title">{lastWorkoutName.current}</span>
+        </div>
 
-      {exercises.map((exercise, index) => (
-        <ExerciseBlock
-          key={index}
-          exercise={exercise}
-          onChange={updated => updateExercise(index, updated)}
-          onRemove={() => removeExercise(index)}
-        />
-      ))}
+        {exercises.map((exercise, index) => (
+            <ExerciseBlock
+            key={index}
+            exercise={exercise}
+            onChange={updated => updateExercise(index, updated)}
+            onRemove={() => removeExercise(index)}
+            />
+        ))}
 
-      <div className="log-section-title" style={{ marginTop: '1rem' }}>Add exercise</div>
-      <div className="add-exercise-row">
-        <input
-          className="add-exercise-input"
-          type="text"
-          placeholder="Exercise name"
-          value={exerciseName}
-          onChange={e => setExerciseName(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && addExercise()}
-        />
-        <input
-          className="set-input"
-          type="number"
-          min="1"
-          max="10"
-          value={setCount}
-          onChange={e => setSetCount(parseInt(e.target.value))}
-          style={{ width: '4rem' }}
-          title="Number of sets"
-        />
-        <button className="btn-small" onClick={addExercise}>Add</button>
-      </div>
+        <div className="log-section-title" style={{ marginTop: '1rem' }}>Add exercise</div>
+        <div className="add-exercise-row">
+            <input
+            className="add-exercise-input"
+            type="text"
+            placeholder="Exercise name"
+            value={exerciseName}
+            onChange={e => setExerciseName(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && addExercise()}
+            />
+            <input
+            className="set-input"
+            type="number"
+            min="1"
+            max="10"
+            value={setCount}
+            onChange={e => setSetCount(parseInt(e.target.value))}
+            style={{ width: '4rem' }}
+            title="Number of sets"
+            />
+            <button className="btn-small" onClick={addExercise}>Add</button>
+        </div>
 
-      <button className="btn-primary" onClick={handleSave}>Save workout</button>
-      <button className="btn-secondary" onClick={onCancel}>Cancel</button>
+        <button className="btn-primary" onClick={handleSave}>Save workout</button>
+        <button className="btn-secondary" onClick={onCancel}>Cancel</button>
+        </div>
     </div>
   )
 }
