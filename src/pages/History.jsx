@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { supabase } from '../lib/supabase'
 import WorkoutCard from '../components/WorkoutCard'
 import WorkoutDetail from '../components/WorkoutDetail'
 
@@ -7,6 +8,7 @@ const mockStats = {
   bodweightChange: - 0.9,
 }
 
+/*
 const mockWorkouts = [
   {
     id: 1,
@@ -77,12 +79,38 @@ const mockWorkouts = [
     ],
   },
 ]
+  */
 
 export default function History() {
+  const [workouts, setWorkouts] = useState([])
   const [selectedWorkout, setSelectedWorkout] = useState(null)
+  const [loading, setLoading] = useState(true)
 
   const overloadPositive = mockStats.overload >= 0
   const bodyweightPositive = mockStats.bodweightChange >= 0
+
+  useEffect(() => {
+    const fetchWorkouts = async () => {
+      const { data, error } = await supabase
+        .from('workouts')
+        .select(`
+          *,
+          exercises (
+            *,
+            sets (*)
+          )
+        `)
+        .order('created_at', { ascending: false })
+
+      if (error) console.error(error)
+        else setWorkouts(data)
+      setLoading(false)
+    }
+
+    fetchWorkouts()
+  }, [])
+
+  if (loading) return <div className="page">Loading...</div>
 
   return (
     <>
@@ -108,13 +136,18 @@ export default function History() {
 
       <div className="workout-list">
         <div className="workout-list-title">Sessions</div>
-        {mockWorkouts.map(workout => (
-          <WorkoutCard
-            key={workout.id}
-            workout={workout}
-            onClick={() => setSelectedWorkout(workout)}
-          />
-        ))}
+        {workouts.length === 0
+          ? <div style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem'}}>
+              No workouts yet
+            </div>
+          : workouts.map(workout => (
+            <WorkoutCard
+              key={workout.id}
+              workout={workout}
+              onClick={() => setSelectedWorkout(workout)}
+            />
+          ))
+        }
       </div>
 
       <WorkoutDetail
