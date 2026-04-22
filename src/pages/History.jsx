@@ -5,7 +5,7 @@ import WorkoutDetail from '../components/WorkoutDetail'
 
 const mockStats = {
   overload: 4.2,
-  bodweightChange: - 0.9,
+  bodweightChange: -0.9,
 }
 
 /*
@@ -93,61 +93,76 @@ export default function History() {
     const fetchWorkouts = async () => {
       const { data, error } = await supabase
         .from('workouts')
-        .select(`
+        .select(
+          `
           *,
           exercises (
             *,
-            sets (*)
+            sets (*),
+            exercise_muscles (*)
           )
-        `)
+        `
+        )
         .order('created_at', { ascending: false })
 
       if (error) console.error(error)
-        else setWorkouts(data)
+      else setWorkouts(data)
       setLoading(false)
     }
 
     fetchWorkouts()
   }, [])
 
-  if (loading) return <div className="page">Loading...</div>
+  if (loading) return <div className='page'>Loading...</div>
 
   return (
     <>
-      <div className="history-header">
-        <div className="history-title">Gym</div>
-        <div className="history-subtitle">Week 18 · April 2026</div>
+      <div className='history-header'>
+        <div className='history-title'>Gym</div>
+        <div className='history-subtitle'>Week 18 · April 2026</div>
       </div>
 
-      <div className="stat-grid">
-        <div className="stat-card">
-          <div className={`stat-card-value ${overloadPositive ? 'positive' : 'negative'}`}>
-            {overloadPositive ? '+ ' : '- '}{Math.abs(mockStats.overload).toFixed(1)} %
+      <div className='stat-grid'>
+        <div className='stat-card'>
+          <div
+            className={`stat-card-value ${overloadPositive ? 'positive' : 'negative'}`}
+          >
+            {overloadPositive ? '+ ' : '- '}
+            {Math.abs(mockStats.overload).toFixed(1)} %
           </div>
-          <div className="stat-card-label">Avg progressive overload</div>
+          <div className='stat-card-label'>Avg progressive overload</div>
         </div>
-        <div className="stat-card">
-          <div className={`stat-card-value ${bodyweightPositive ? 'positive' : 'negative'}`}>
-            {bodyweightPositive ? '+ ' : '- '}{Math.abs(mockStats.bodweightChange).toFixed(1)} kg
+        <div className='stat-card'>
+          <div
+            className={`stat-card-value ${bodyweightPositive ? 'positive' : 'negative'}`}
+          >
+            {bodyweightPositive ? '+ ' : '- '}
+            {Math.abs(mockStats.bodweightChange).toFixed(1)} kg
           </div>
-          <div className="stat-card-label">Bodyweight change this week</div>
+          <div className='stat-card-label'>Bodyweight change this week</div>
         </div>
       </div>
 
-      <div className="workout-list">
-        <div className="workout-list-title">Sessions</div>
-        {workouts.length === 0
-          ? <div style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem'}}>
-              No workouts yet
-            </div>
-          : workouts.map(workout => (
+      <div className='workout-list'>
+        <div className='workout-list-title'>Sessions</div>
+        {workouts.length === 0 ? (
+          <div
+            style={{
+              color: 'var(--color-text-secondary)',
+              fontSize: '0.875rem',
+            }}
+          >
+            No workouts yet
+          </div>
+        ) : (
+          workouts.map((workout) => (
             <WorkoutCard
               key={workout.id}
               workout={workout}
               onClick={() => setSelectedWorkout(workout)}
             />
           ))
-        }
+        )}
       </div>
 
       <WorkoutDetail

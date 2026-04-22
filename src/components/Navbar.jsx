@@ -6,8 +6,8 @@ function Navbar({ currentPage, setPage }) {
   ]
 
   return (
-    <nav className="navbar">
-      {tabs.map(tab => (
+    <nav className='navbar'>
+      {tabs.map((tab) => (
         <button
           key={tab.id}
           onClick={() => setPage(tab.id)}

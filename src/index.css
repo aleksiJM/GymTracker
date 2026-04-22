@@ -26,7 +26,9 @@
 }
 
 /* Base */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -201,10 +203,22 @@ body {
   border-radius: 1rem;
 }
 
-.tag-push { background-color: var(--color-push-bg); color: var(--color-push-text); }
-.tag-pull { background-color: var(--color-pull-bg); color: var(--color-pull-text); }
-.tag-legs { background-color: var(--color-legs-bg); color: var(--color-legs-text); }
-.tag-core { background-color: var(--color-core-bg); color: var(--color-core-text); }
+.tag-push {
+  background-color: var(--color-push-bg);
+  color: var(--color-push-text);
+}
+.tag-pull {
+  background-color: var(--color-pull-bg);
+  color: var(--color-pull-text);
+}
+.tag-legs {
+  background-color: var(--color-legs-bg);
+  color: var(--color-legs-text);
+}
+.tag-core {
+  background-color: var(--color-core-bg);
+  color: var(--color-core-text);
+}
 
 .workout-card-meta {
   font-size: 0.75rem;
@@ -241,7 +255,6 @@ body {
   top: 0;
   background-color: var(--color-background);
 }
-
 
 .detail-back-btn {
   background: none;
@@ -357,7 +370,9 @@ body {
   margin-bottom: 0.75rem;
 }
 
-.btn-primary:hover { opacity: 0.9; }
+.btn-primary:hover {
+  opacity: 0.9;
+}
 
 .btn-secondary {
   width: 100%;
@@ -373,7 +388,9 @@ body {
   margin-bottom: 0.75rem;
 }
 
-.btn-secondary:hover { background-color: var(--color-surface); }
+.btn-secondary:hover {
+  background-color: var(--color-surface);
+}
 
 .btn-small {
   padding: 0.5rem 0.875rem;
@@ -387,7 +404,9 @@ body {
   transition: background-color 0.15s;
 }
 
-.btn-small:hover { background-color: var(--color-primary-light); }
+.btn-small:hover {
+  background-color: var(--color-primary-light);
+}
 
 .btn-danger {
   padding: 0.5rem 0.875rem;
@@ -415,7 +434,9 @@ body {
   transition: background-color 0.15s;
 }
 
-.btn-bodyweight:hover { background-color: var(--color-select); }
+.btn-bodyweight:hover {
+  background-color: var(--color-select);
+}
 
 .bodyweight-value {
   font-weight: 500;
@@ -572,6 +593,7 @@ body {
   border: 0.0625rem solid var(--color-border);
   border-radius: 0.75rem;
   font-size: 0.9375rem;
+  width: 100%;
   color: var(--color-text-primary);
   background-color: var(--color-surface);
 }
@@ -593,4 +615,44 @@ body {
 
 .active-workout-panel.open {
   transform: translateX(-50%) translateX(0);
+}
+
+/* Muscle tags */
+.muscle-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin-bottom: 0.5rem;
+}
+
+.muscle-tag {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  padding: 0.1875rem 0.375rem 0.1875rem 0.5rem;
+  border-radius: 1rem;
+  background-color: var(--color-primary-light);
+  color: var(--color-primary-text);
+}
+
+.muscle-tag-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-primary-text);
+  font-size: 0.75rem;
+  padding: 0;
+  line-height: 1;
+}
+
+.muscle-selector {
+  margin-bottom: 0.75rem;
+}
+
+.muscle-selector-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
 }

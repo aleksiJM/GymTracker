@@ -12,14 +12,14 @@ function App() {
     const test = async () => {
       const { data, error } = await supabase.from('workouts').select('*')
       if (error) console.error('Supabase error:', error)
-        else console.log('Supabase connected! Data:', data)
+      else console.log('Supabase connected! Data:', data)
     }
     test()
   }, [])
 
   return (
-    <div className="app">
-      <main className="main-content">
+    <div className='app'>
+      <main className='main-content'>
         {page === 'history' && <History />}
         {page === 'log' && <LogWorkout />}
         {page === 'progress' && <Progress />}
