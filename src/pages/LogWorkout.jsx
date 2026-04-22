@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import ActiveWorkout from '../components/ActiveWorkout'
 import BodyweightModal from '../components/BodyweightModal'
+import { supabase } from '../lib/supabase'
 
 const recentWorkouts = [
   {
@@ -56,8 +57,38 @@ export default function LogWorkout() {
     setActiveWorkout({ name: workout.name, exercises: workout.exercises })
   }
 
-  const saveWorkout = (workout) => {
-    console.log('Saving workout:', workout)
+  const saveWorkout = async (workout) => {
+    const { data: workoutData, error: workoutError } = await supabase
+      .from('workouts')
+      .insert({ name: workout.name })
+      .select()
+      .single()
+    
+    if (workoutError) { console.error(workoutError); return }
+
+    for (const [i, exercise] of workout.exercises.entries()) {
+      const { data: exerciseData, error: exerciseError } = await supabase
+        .from('exercises')
+        .insert({ workout_id: workoutData.id, name: exercise.name, order_index: i })
+        .select()
+        .single()
+      
+      if (exerciseError) { console.error(exerciseError); return }
+
+      const setsToInsert = exercise.sets.map((set, j) => ({
+        exercise_id: exerciseData.id,
+        set_number: j + 1,
+        reps: set.reps,
+        weight: set.weight,
+      }))
+
+      const { error: setsError } = await supabase
+        .from('sets')
+        .insert(setsToInsert)
+
+      if (setsError) { console.error(setsError); return }
+    }
+
     setActiveWorkout(null)
   }
 
