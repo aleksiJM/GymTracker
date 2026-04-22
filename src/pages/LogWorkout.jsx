@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import ActiveWorkout from '../components/ActiveWorkout'
 import BodyweightModal from '../components/BodyweightModal'
 
+/*
 const recentWorkouts = [
   {
     id: 1,
@@ -83,6 +84,7 @@ const recentWorkouts = [
     ],
   },
 ]
+  */
 
 export default function LogWorkout() {
   const [bodyweight, setBodyweight] = useState(83.5)
@@ -90,7 +92,7 @@ export default function LogWorkout() {
   const [activeWorkout, setActiveWorkout] = useState(null)
   const [showNameModal, setShowNameModal] = useState(false)
   const [newWorkoutName, setNewWorkoutName] = useState('')
-  const [workouts, setWorkouts] = useState([])
+  const [recentWorkouts, setRecentWorkouts] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -108,9 +110,10 @@ export default function LogWorkout() {
         `
         )
         .order('created_at', { ascending: false })
+        .limit(8)
 
       if (error) console.error(error)
-      else setWorkouts(data)
+      else setRecentWorkouts(data)
       setLoading(false)
     }
 
@@ -125,6 +128,14 @@ export default function LogWorkout() {
   }
 
   const repeatWorkout = (workout) => {
+    const exercises = workout.exercises.map((ex) => ({
+      name: ex.name,
+      muscles: ex.exercise_muscles || [],
+      sets: Array.from({ length: ex.sets.length }, () => ({
+        reps: '',
+        weight: '',
+      })),
+    }))
     setActiveWorkout({ name: workout.name, exercises: workout.exercises })
   }
 
@@ -183,8 +194,15 @@ export default function LogWorkout() {
         console.error(setsError)
         return
       }
+
+      const { data: updatedWorkouts } = await supabase
+        .from('workouts')
+        .select(`*, exercises (*, sets (*), exercise_muscles (*))`)
+        .order('created_at', { ascending: false })
+        .limit(5)
     }
 
+    if (updatedWorkouts) setRecentWorkout(updatedWorkouts)
     setActiveWorkout(null)
   }
 
@@ -216,25 +234,46 @@ export default function LogWorkout() {
         </button>
 
         <div className='log-section-title'>Repeat previous</div>
-        {recentWorkouts.map((workout) => (
+
+        {loading ? (
           <div
-            key={workout.id}
-            className='workout-card'
-            onClick={() => repeatWorkout(workout)}
+            style={{
+              color: 'var(--color-text-secondary)',
+              fontSize: '0.875rem',
+            }}
           >
-            <div className='workout-card-header'>
-              <span className='workout-card-name'>{workout.name}</span>
-              <span
-                style={{ fontSize: '0.75rem', color: 'var(--color-primary)' }}
-              >
-                Repeat &rarr;
-              </span>
-            </div>
-            <div className='workout-card-meta'>
-              {workout.exercises.length} exercises
-            </div>
+            Loading...
           </div>
-        ))}
+        ) : recentWorkouts.length === 0 ? (
+          <div
+            style={{
+              color: 'var(--color-text-secondary)',
+              fontSize: '0.875rem',
+            }}
+          >
+            No previous workouts yet
+          </div>
+        ) : (
+          recentWorkouts.map((workout) => (
+            <div
+              key={workout.id}
+              className='workout-card'
+              onClick={() => repeatWorkout(workout)}
+            >
+              <div className='workout-card-header'>
+                <span className='workout-card-name'>{workout.name}</span>
+                <span
+                  style={{ fontSize: '0.75rem', color: 'var(--color-primary)' }}
+                >
+                  Repeat &rarr;
+                </span>
+              </div>
+              <div className='workout-card-meta'>
+                {workout.exercises.length} exercises
+              </div>
+            </div>
+          ))
+        )}
 
         {showNameModal && (
           <div
