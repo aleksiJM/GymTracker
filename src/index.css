@@ -657,7 +657,7 @@ body {
   align-items: center;
 }
 
-/* Delete button */
+/* Detail panel delete button */
 .btn-delete {
   width: 100%;
   padding: 0.875rem;
@@ -674,4 +674,23 @@ body {
 
 .btn-delete:hover {
   background-color: #fee2e2;
+}
+
+/* Toggleable stat card */
+.stat-card-toggle {
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+  justify-content: space-between;
+  margin-bottom: 0.25 rem;
+}
+
+button.stat-card {
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.15s;
+}
+
+button.stat-card:hover {
+  opacity: 0.8;
 }

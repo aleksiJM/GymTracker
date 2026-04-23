@@ -1,7 +1,26 @@
 import { useState } from 'react'
+import { supabase } from '../lib/supabase'
 
 export default function BodyweightModal({ current, onSave, onClose }) {
   const [value, setValue] = useState(current ?? '')
+  const [saving, setSaving] = useState(false)
+
+  const handleSave = async () => {
+    if (!value) return
+    setSaving(true)
+
+    const { error } = await supabase
+      .from('bodyweight')
+      .insert({ weight: parseFloat(value) })
+
+    if (error) {
+      console.error(error)
+      setSaving(false)
+      return
+    }
+
+    onSave(parseFloat(value))
+  }
 
   return (
     <div className='modal-overlay' onClick={onClose}>
@@ -31,11 +50,10 @@ export default function BodyweightModal({ current, onSave, onClose }) {
           </button>
           <button
             className='modal-confirm'
-            onClick={() => {
-              if (value) onSave(parseFloat(value))
-            }}
+            onClick={handleSave}
+            disabled={saving}
           >
-            Save
+            {saving ? 'Saving...' : 'Save'}
           </button>
         </div>
       </div>

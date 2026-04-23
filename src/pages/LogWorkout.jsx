@@ -87,13 +87,13 @@ const recentWorkouts = [
   */
 
 export default function LogWorkout() {
-  const [bodyweight, setBodyweight] = useState(83.5)
   const [showBodyweightModal, setShowBodyweightModal] = useState(false)
   const [activeWorkout, setActiveWorkout] = useState(null)
   const [showNameModal, setShowNameModal] = useState(false)
   const [newWorkoutName, setNewWorkoutName] = useState('')
   const [recentWorkouts, setRecentWorkouts] = useState([])
   const [loading, setLoading] = useState(true)
+  const [bodyweight, setBodyweight] = useState(null)
 
   useEffect(() => {
     const fetchWorkouts = async () => {
@@ -117,7 +117,18 @@ export default function LogWorkout() {
       setLoading(false)
     }
 
+    const fetchBodyweight = async () => {
+      const { data, error } = await supabase
+        .from('bodyweight')
+        .select('weight')
+        .order('created_at', { ascending: false })
+        .limit(1)
+
+      if (!error && data && data.length > 0) setBodyweight(data[0].weight)
+    }
+
     fetchWorkouts()
+    fetchBodyweight()
   }, [])
 
   const startNew = () => {
@@ -136,7 +147,7 @@ export default function LogWorkout() {
         weight: '',
       })),
     }))
-    setActiveWorkout({ name: workout.name, exercises: workout.exercises })
+    setActiveWorkout({ name: workout.name, exercises })
   }
 
   const saveWorkout = async (workout) => {
@@ -227,7 +238,9 @@ export default function LogWorkout() {
           onClick={() => setShowBodyweightModal(true)}
         >
           <span>Bodyweight</span>
-          <span className='bodyweight-value'>{bodyweight} kg</span>
+          <span className='bodyweight-value'>
+            {bodyweight ? `${bodyweight} kg` : 'Not set'}
+          </span>
           <span
             style={{ marginLeft: 'auto', color: 'var(--color-text-secondary)' }}
           >
