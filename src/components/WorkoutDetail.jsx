@@ -1,7 +1,10 @@
-import { useEffect, useRef } from 'react'
+import { supabase } from '../lib/supabase'
+import { useEffect, useRef, useState } from 'react'
 
-export default function WorkoutDetail({ workout, onClose }) {
+export default function WorkoutDetail({ workout, onClose, onDelete }) {
   const lastWorkout = useRef(null)
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     if (workout) {
@@ -10,6 +13,26 @@ export default function WorkoutDetail({ workout, onClose }) {
   }, [workout])
 
   const displayed = workout || lastWorkout.current
+
+  const handleDelete = async () => {
+    if (!displayed) return
+    setDeleting(true)
+    const { error } = await supabase
+      .from('workouts')
+      .delete()
+      .eq('id', displayed.id)
+
+    if (error) {
+      console.error(error)
+      setDeleting(false)
+      return
+    }
+
+    setShowConfirm(false)
+    setDeleting(false)
+    onDelete(displayed.id)
+    onClose()
+  }
 
   const totalSets = displayed
     ? displayed.exercises.reduce((sum, ex) => sum + (ex.sets?.length || 0), 0)
@@ -62,6 +85,46 @@ export default function WorkoutDetail({ workout, onClose }) {
                 )
               })}
             </div>
+            <button className='btn-delete' onClick={() => setShowConfirm(true)}>
+              Delete workout
+            </button>
+
+            {showConfirm && (
+              <div
+                className='modal-overlay'
+                onClick={() => setShowConfirm(false)}
+              >
+                <div className='modal-box' onClick={(e) => e.stopPropagation()}>
+                  <div className='modal-title'>Delete workout?</div>
+                  <p
+                    style={{
+                      fontSize: '0.875rem',
+                      color: 'var(--color-text-secondary',
+                      marginBottom: '1rem',
+                    }}
+                  >
+                    This will permanently delete "{displayed.name}" and all its
+                    exercises.
+                  </p>
+                  <div className='modal-actions'>
+                    <button
+                      className='modal-cancel'
+                      onClick={() => setShowConfirm(false)}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      className='modal-confirm'
+                      style={{ background: '#dc2626' }}
+                      onClick={handleDelete}
+                      disabled={deleting}
+                    >
+                      {deleting ? 'Deleting...' : 'Delete'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>

@@ -656,3 +656,22 @@ body {
   gap: 0.5rem;
   align-items: center;
 }
+
+/* Delete button */
+.btn-delete {
+  width: 100%;
+  padding: 0.875rem;
+  background-color: transparent;
+  color: #dc2626;
+  border: 0.0625rem solid #dc2626;
+  border-radius: 0.75rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: background-color 0.15s;
+}
+
+.btn-delete:hover {
+  background-color: #fee2e2;
+}
