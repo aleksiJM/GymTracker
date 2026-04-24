@@ -3,89 +3,6 @@ import { supabase } from '../lib/supabase'
 import ActiveWorkout from '../components/ActiveWorkout'
 import BodyweightModal from '../components/BodyweightModal'
 
-/*
-const recentWorkouts = [
-  {
-    id: 1,
-    name: 'Push day',
-    exercises: [
-      {
-        name: 'Bench press',
-        sets: Array.from({ length: 4 }, () => ({ reps: '', weight: '' })),
-      },
-      {
-        name: 'Overhead press',
-        sets: Array.from({ length: 3 }, () => ({ reps: '', weight: '' })),
-      },
-      {
-        name: 'Incline dumbbell press',
-        sets: Array.from({ length: 3 }, () => ({ reps: '', weight: '' })),
-      },
-      {
-        name: 'Lateral raises',
-        sets: Array.from({ length: 3 }, () => ({ reps: '', weight: '' })),
-      },
-      {
-        name: 'Tricep pushdown',
-        sets: Array.from({ length: 3 }, () => ({ reps: '', weight: '' })),
-      },
-    ],
-  },
-  {
-    id: 2,
-    name: 'Pull day',
-    exercises: [
-      {
-        name: 'Deadlift',
-        sets: Array.from({ length: 4 }, () => ({ reps: '', weight: '' })),
-      },
-      {
-        name: 'Pull ups',
-        sets: Array.from({ length: 3 }, () => ({ reps: '', weight: '' })),
-      },
-      {
-        name: 'Barbell row',
-        sets: Array.from({ length: 3 }, () => ({ reps: '', weight: '' })),
-      },
-      {
-        name: 'Face pulls',
-        sets: Array.from({ length: 3 }, () => ({ reps: '', weight: '' })),
-      },
-      {
-        name: 'Barbell curl',
-        sets: Array.from({ length: 3 }, () => ({ reps: '', weight: '' })),
-      },
-    ],
-  },
-  {
-    id: 3,
-    name: 'Leg day',
-    exercises: [
-      {
-        name: 'Squat',
-        sets: Array.from({ length: 4 }, () => ({ reps: '', weight: '' })),
-      },
-      {
-        name: 'Romanian deadlift',
-        sets: Array.from({ length: 3 }, () => ({ reps: '', weight: '' })),
-      },
-      {
-        name: 'Leg press',
-        sets: Array.from({ length: 3 }, () => ({ reps: '', weight: '' })),
-      },
-      {
-        name: 'Leg curl',
-        sets: Array.from({ length: 3 }, () => ({ reps: '', weight: '' })),
-      },
-      {
-        name: 'Calf raises',
-        sets: Array.from({ length: 4 }, () => ({ reps: '', weight: '' })),
-      },
-    ],
-  },
-]
-  */
-
 export default function LogWorkout() {
   const [showBodyweightModal, setShowBodyweightModal] = useState(false)
   const [activeWorkout, setActiveWorkout] = useState(null)
@@ -178,7 +95,7 @@ export default function LogWorkout() {
         return
       }
 
-      if (exercise.muscles.length > 0) {
+      if (exercise.muscles && exercise.muscles.length > 0) {
         const musclesToInsert = exercise.muscles.map((m) => ({
           exercise_id: exerciseData.id,
           muscle_group: m.muscle_group,
@@ -205,12 +122,6 @@ export default function LogWorkout() {
         console.error(setsError)
         return
       }
-
-      const { data: updatedWorkouts } = await supabase
-        .from('workouts')
-        .select(`*, exercises (*, sets (*), exercise_muscles (*))`)
-        .order('created_at', { ascending: false })
-        .limit(5)
     }
 
     const { data: updatedWorkouts } = await supabase
@@ -223,119 +134,115 @@ export default function LogWorkout() {
     setActiveWorkout(null)
   }
 
-  if (loading) return <div className='page'>Loading...</div>
+  if (loading)
+    return <div className='p-6 text-muted-foreground'>Loading...</div>
 
   return (
     <>
-      <div className='log-page'>
-        <div className='log-title'>Log workout</div>
-        <div className='log-subtitle'>
+      <div className='px-6 pt-6 pb-4'>
+        <h1 className='text-[1.375rem] font-medium text-foreground'>
+          Log workout
+        </h1>
+        <p className='text-sm text-muted-foreground mb-5'>
           Start a new session or repeat a previous one
-        </div>
+        </p>
 
         <button
-          className='btn-bodyweight'
+          className='flex items-center gap-2 w-full px-4 py-3 bg-secondary border border-border rounded-xl text-sm text-foreground mb-3 cursor-pointer hover:opacity-80 transition-opacity'
           onClick={() => setShowBodyweightModal(true)}
         >
-          <span>Bodyweight</span>
-          <span className='bodyweight-value'>
+          <span className='text-muted-foreground'>Bodyweight</span>
+          <span className='font-medium text-primary'>
             {bodyweight ? `${bodyweight} kg` : 'Not set'}
           </span>
-          <span
-            style={{ marginLeft: 'auto', color: 'var(--color-text-secondary)' }}
-          >
-            &#x270E;
-          </span>
+          <span className='ml-auto text-muted-foreground'>&#x270E;</span>
         </button>
 
-        <button className='btn-primary' onClick={() => setShowNameModal(true)}>
+        <button
+          className='w-full py-3.5 bg-primary text-primary-foreground rounded-xl text-[0.9375rem] font-medium cursor-pointer hover:opacity-90 transition-opacity mb-5'
+          onClick={() => setShowNameModal(true)}
+        >
           + Start new workout
         </button>
 
-        <div className='log-section-title'>Repeat previous</div>
+        <p className='text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3'>
+          Repeat previous
+        </p>
 
-        {loading ? (
-          <div
-            style={{
-              color: 'var(--color-text-secondary)',
-              fontSize: '0.875rem',
-            }}
-          >
-            Loading...
-          </div>
-        ) : recentWorkouts.length === 0 ? (
-          <div
-            style={{
-              color: 'var(--color-text-secondary)',
-              fontSize: '0.875rem',
-            }}
-          >
+        {recentWorkouts.length === 0 ? (
+          <p className='text-sm text-muted-foreground'>
             No previous workouts yet
-          </div>
+          </p>
         ) : (
           recentWorkouts.map((workout) => (
             <div
               key={workout.id}
-              className='workout-card'
+              className='bg-card border border-border rounded-xl px-4 py-3 mb-2 cursor-pointer hover:bg-secondary transition-colors'
               onClick={() => repeatWorkout(workout)}
             >
-              <div className='workout-card-header'>
-                <span className='workout-card-name'>{workout.name}</span>
-                <span
-                  style={{ fontSize: '0.75rem', color: 'var(--color-primary)' }}
-                >
-                  Repeat &rarr;
+              <div className='flex justify-between items-center'>
+                <span className='text-[0.9375rem] font-medium text-foreground'>
+                  {workout.name}
                 </span>
+                <span className='text-xs text-primary'>Repeat &rarr;</span>
               </div>
-              <div className='workout-card-meta'>
+              <p className='text-xs text-muted-foreground mt-1'>
                 {workout.exercises.length} exercises
-              </div>
+              </p>
             </div>
           ))
         )}
+      </div>
 
-        {showNameModal && (
+      {showNameModal && (
+        <div
+          className='fixed inset-0 bg-black/50 flex items-end justify-center z-50'
+          onClick={() => setShowNameModal(false)}
+        >
           <div
-            className='modal-overlay'
-            onClick={() => setShowNameModal(false)}
+            className='bg-card rounded-t-2xl p-6 w-full max-w-[430px]'
+            onClick={(e) => e.stopPropagation()}
           >
-            <div className='modal-box' onClick={(e) => e.stopPropagation()}>
-              <div className='modal-title'>New workout</div>
-              <input
-                className='modal-input'
-                type='text'
-                placeholder='e.g. Push day'
-                value={newWorkoutName}
-                onChange={(e) => setNewWorkoutName(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && startNew()}
-                autoFocus
-              />
-              <div className='modal-actions'>
-                <button
-                  className='modal-cancel'
-                  onClick={() => setShowNameModal(false)}
-                >
-                  Cancel
-                </button>
-                <button className='modal-confirm' onClick={startNew}>
-                  Start
-                </button>
-              </div>
+            <h3 className='text-[1.0625rem] font-medium text-foreground mb-4'>
+              New workout
+            </h3>
+            <input
+              className='w-full px-4 py-3 bg-secondary border border-border rounded-xl text-foreground text-[0.9375rem] mb-4 outline-none focus:border-primary'
+              type='text'
+              placeholder='e.g. Push day'
+              value={newWorkoutName}
+              onChange={(e) => setNewWorkoutName(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && startNew()}
+              autoFocus
+            />
+            <div className='grid grid-cols-2 gap-3'>
+              <button
+                className='py-3 border border-border rounded-xl text-muted-foreground cursor-pointer hover:bg-secondary transition-colors'
+                onClick={() => setShowNameModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className='py-3 bg-primary text-primary-foreground rounded-xl font-medium cursor-pointer hover:opacity-90 transition-opacity'
+                onClick={startNew}
+              >
+                Start
+              </button>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {showBodyweightModal && (
-          <BodyweightModal
-            current={bodyweight}
-            onSave={(val) => {
-              setBodyweight(val)
-              setShowBodyweightModal(false)
-            }}
-            onClose={() => setShowBodyweightModal(false)}
-          />
-        )}
-      </div>
+      {showBodyweightModal && (
+        <BodyweightModal
+          current={bodyweight}
+          onSave={(val) => {
+            setBodyweight(val)
+            setShowBodyweightModal(false)
+          }}
+          onClose={() => setShowBodyweightModal(false)}
+        />
+      )}
 
       <ActiveWorkout
         workoutName={activeWorkout?.name ?? ''}

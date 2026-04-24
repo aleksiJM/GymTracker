@@ -3,20 +3,12 @@ import { supabase } from '../lib/supabase'
 import WorkoutCard from '../components/WorkoutCard'
 import WorkoutDetail from '../components/WorkoutDetail'
 
-const mockStats = {
-  overload: 4.2,
-  bodweightChange: -0.9,
-}
-
 export default function History() {
   const [workouts, setWorkouts] = useState([])
   const [selectedWorkout, setSelectedWorkout] = useState(null)
   const [loading, setLoading] = useState(true)
   const [bodyweightChange, setBodyweightChange] = useState(null)
   const [bodyweightView, setBodyweightView] = useState('week')
-
-  const overloadPositive = mockStats.overload >= 0
-  const bodyweightPositive = mockStats.bodweightChange >= 0
 
   const handleDelete = (deletedId) => {
     setWorkouts((prev) => prev.filter((w) => w.id !== deletedId))
@@ -46,7 +38,7 @@ export default function History() {
     const fetchBodyweight = async () => {
       const { data, error } = await supabase
         .from('bodyweight')
-        .select('weight', 'created_at')
+        .select('weight, created_at')
         .order('created_at', { ascending: true })
 
       if (!error && data && data.length > 0) {
@@ -99,22 +91,26 @@ export default function History() {
     fetchBodyweight()
   }, [])
 
-  if (loading) return <div className='page'>Loading...</div>
+  if (loading)
+    return <div className='p-6 text-muted-foreground'>Loading...</div>
 
   return (
     <>
-      <div className='history-header'>
-        <div className='history-title'>Gym</div>
-        <div className='history-subtitle'>Week 18 · April 2026</div>
+      <div className='px-6 pt-6 pb-3'>
+        <h1 className='text-[1.375rem] font-medium text-foreground'>Gym</h1>
+        <p className='text-sm text-muted-foreground'>Week 18 · April 2026</p>
       </div>
 
-      <div className='stat-grid'>
-        <div className='stat-card'>
-          <div className='stat-card-value positive'>+ 4.2 %</div>
-          <div className='stat-card-label'>Avg progressive overload</div>
+      <div className='grid grid-cols-2 gap-3 px-6 pb-3'>
+        <div className='bg-secondary rounded-xl p-4'>
+          <div className='text-[1.375rem] font-medium text-primary'>+4.2%</div>
+          <div className='text-xs text-muted-foreground mt-1'>
+            Avg progressive overload
+          </div>
         </div>
+
         <button
-          className='stat-card'
+          className='bg-secondary rounded-xl p-4 text-left cursor-pointer hover:opacity-80 transition-opacity w-full'
           onClick={() =>
             setBodyweightView((v) => {
               if (v === 'week') return 'month'
@@ -122,49 +118,41 @@ export default function History() {
               return 'week'
             })
           }
-          style={{ width: '100%', textAlign: 'left', cursor: 'pointer' }}
         >
           {bodyweightChange !== null ? (
             <>
-              <div className='stat-card-toggle'>
-                <div
-                  className={`stat-card-value ${bodyweightChange[bodyweightView] <= 0 ? 'positive' : 'negative'}`}
-                >
-                  {bodyweightChange[bodyweightView] > 0 ? '+ ' : '- '}
-                  {Math.abs(bodyweightChange[bodyweightView]).toFixed(1)} kg
-                </div>
-                <div className='stat-card-label'>
-                  Bodyweight change ·{' '}
-                  {bodyweightView === 'week'
-                    ? 'last 7 days'
-                    : bodyweightView === 'month'
-                      ? 'last 30 days'
-                      : 'all time'}
-                </div>
+              <div
+                className={`text-[1.375rem] font-medium ${bodyweightChange[bodyweightView] <= 0 ? 'text-primary' : 'text-destructive'}`}
+              >
+                {bodyweightChange[bodyweightView] > 0 ? '+ ' : '- '}
+                {Math.abs(bodyweightChange[bodyweightView]).toFixed(1)} kg
+              </div>
+              <div className='text-xs text-muted-foreground mt-1'>
+                Bodyweight change ·{' '}
+                {bodyweightView === 'week'
+                  ? 'last 7 days'
+                  : bodyweightView === 'month'
+                    ? 'last 30 days'
+                    : 'all time'}
               </div>
             </>
           ) : (
             <>
-              <div className='stat-card-value' style={{ fontSize: '1rem' }}>
-                No data
+              <div className='text-base text-muted-foreground'>No data</div>
+              <div className='text-xs text-muted-foreground mt-1'>
+                Bodyweight change
               </div>
-              <div className='stat-card-label'>Bodyweight change this week</div>
             </>
           )}
         </button>
       </div>
 
-      <div className='workout-list'>
-        <div className='workout-list-title'>Sessions</div>
+      <div className='px-6'>
+        <p className='text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3'>
+          Sessions
+        </p>
         {workouts.length === 0 ? (
-          <div
-            style={{
-              color: 'var(--color-text-secondary)',
-              fontSize: '0.875rem',
-            }}
-          >
-            No workouts yet
-          </div>
+          <p className='text-sm text-muted-foreground'>No workouts yet</p>
         ) : (
           workouts.map((workout) => (
             <WorkoutCard
