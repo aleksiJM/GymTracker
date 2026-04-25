@@ -1,5 +1,14 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
 
 export default function BodyweightModal({ current, onSave, onClose }) {
   const [value, setValue] = useState(current ?? '')
@@ -23,40 +32,46 @@ export default function BodyweightModal({ current, onSave, onClose }) {
   }
 
   return (
-    <div className='modal-overlay' onClick={onClose}>
-      <div className='modal-box' onClick={(e) => e.stopPropagation()}>
-        <div className='modal-title'>Update bodyweight</div>
-        <input
-          className='modal-input'
-          type='number'
-          step='0.1'
-          placeholder='e.g. 83.5'
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          autoFocus
-        />
-        <div
-          style={{
-            fontSize: '0.75rem',
-            color: 'var(--color-text-secondary)',
-            marginBottom: '1rem',
-          }}
-        >
-          Current: {current ? `${current} kg` : 'Not set'}
+    <Dialog open={true} onOpenChange={onClose}>
+      <DialogContent className='max-w-[400px] bg-card border-border'>
+        <DialogHeader>
+          <DialogTitle className='text-foreground'>
+            Update bodyweight
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className='py-2'>
+          <Input
+            type='number'
+            step='0.1'
+            placeholder='e.g. 80.0'
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            className='bg-secondary border-border text-foreground mb-2'
+            autofocus
+          />
+          <p className='text-xs text-muted-foreground'>
+            Current: {current ? `${current} kg` : `Not set`}
+          </p>
         </div>
-        <div className='modal-actions'>
-          <button className='modal-cancel' onClick={onClose}>
+
+        <DialogFooter className='grid grid-cols-2 gap-3'>
+          <Button
+            variant='outline'
+            className='border-border text-muted-foreground'
+            onClick={onClose}
+          >
             Cancel
-          </button>
-          <button
-            className='modal-confirm'
+          </Button>
+          <Button
             onClick={handleSave}
             disabled={saving}
+            className='bg-primary text-primary-foreground'
           >
             {saving ? 'Saving...' : 'Save'}
-          </button>
-        </div>
-      </div>
-    </div>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }

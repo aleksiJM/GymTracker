@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import WorkoutCard from '../components/WorkoutCard'
 import WorkoutDetail from '../components/WorkoutDetail'
+import { Card, CardContent } from '@/components/ui/card'
 
 export default function History() {
   const [workouts, setWorkouts] = useState([])
@@ -91,8 +92,7 @@ export default function History() {
     fetchBodyweight()
   }, [])
 
-  if (loading)
-    return <div className='p-6 text-muted-foreground'>Loading...</div>
+  if (loading) return
 
   return (
     <>
@@ -102,15 +102,19 @@ export default function History() {
       </div>
 
       <div className='grid grid-cols-2 gap-3 px-6 pb-3'>
-        <div className='bg-secondary rounded-xl p-4'>
-          <div className='text-[1.375rem] font-medium text-primary'>+4.2%</div>
-          <div className='text-xs text-muted-foreground mt-1'>
-            Avg progressive overload
-          </div>
-        </div>
+        <Card className='bg-secondary border-border'>
+          <CardContent className='p-4'>
+            <div className='text-[1.375rem] font-medium text-primary'>
+              + 4.2 %
+            </div>
+            <div className='text-xs text-muted-foreground mt-1'>
+              Avg progressive overload
+            </div>
+          </CardContent>
+        </Card>
 
-        <button
-          className='bg-secondary rounded-xl p-4 text-left cursor-pointer hover:opacity-80 transition-opacity w-full'
+        <Card
+          className='bg-secondary border-border cursor-pointer hover:opactiy-80 active:scale-95 transition-all duration-100 select-none'
           onClick={() =>
             setBodyweightView((v) => {
               if (v === 'week') return 'month'
@@ -119,32 +123,35 @@ export default function History() {
             })
           }
         >
-          {bodyweightChange !== null ? (
-            <>
-              <div
-                className={`text-[1.375rem] font-medium ${bodyweightChange[bodyweightView] <= 0 ? 'text-primary' : 'text-destructive'}`}
-              >
-                {bodyweightChange[bodyweightView] > 0 ? '+ ' : '- '}
-                {Math.abs(bodyweightChange[bodyweightView]).toFixed(1)} kg
-              </div>
-              <div className='text-xs text-muted-foreground mt-1'>
-                Bodyweight change ·{' '}
-                {bodyweightView === 'week'
-                  ? 'last 7 days'
-                  : bodyweightView === 'month'
-                    ? 'last 30 days'
-                    : 'all time'}
-              </div>
-            </>
-          ) : (
-            <>
-              <div className='text-base text-muted-foreground'>No data</div>
-              <div className='text-xs text-muted-foreground mt-1'>
-                Bodyweight change
-              </div>
-            </>
-          )}
-        </button>
+          <CardContent className='p-4'>
+            {bodyweightChange !== null ? (
+              <>
+                <div
+                  className={`text-[1.375rem] font-medium ${bodyweightChange[bodyweightView] <= 0 ? 'text-primary' : 'text-destructive'}`}
+                >
+                  {bodyweightChange[bodyweightView] > 0 ? '+ ' : '- '}
+                  {Math.abs(bodyweightChange[bodyweightView]).toFixed(1)}{' '}
+                  <keygen />
+                </div>
+                <div className='text-xs text-muted-foreground mt-1'>
+                  Bodyweight ·{' '}
+                  {bodyweightView === 'week'
+                    ? 'last 7 days'
+                    : bodyweightView === 'month'
+                      ? 'last 30 days'
+                      : 'all time'}
+                </div>
+              </>
+            ) : (
+              <>
+                <div className='text-base text-muted-foreground'>No data</div>
+                <div className='text-xs text-muted-foreground mt-1'>
+                  Bodyweight change
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       <div className='px-6'>

@@ -1,3 +1,5 @@
+import { Badge } from '@/components/ui/badge'
+
 export default function WorkoutCard({ workout, onClick }) {
   const totalSets = workout.exercises.reduce(
     (sum, ex) => sum + ex.sets.length,
@@ -13,17 +15,18 @@ export default function WorkoutCard({ workout, onClick }) {
   ]
 
   const tagColor = (muscle) => {
-    if (['Chest', 'Shoulders', 'Triceps'].includes(muscle))
-      return 'bg-emerald-950 text-emerald-400'
-    if (['Back', 'Biceps'].includes(muscle)) return 'bg-blue-950 text-blue-400'
+    if (['Chest', 'Deltoids', 'Triceps'].includes(muscle))
+      return 'bg-emerald-950 text-emerald-400 hover:bg-emerald-950'
+    if (['Back', 'Biceps'].includes(muscle))
+      return 'bg-blue-950 text-blue-400 hover:bg-blue-950'
     if (['Quads', 'Hamstrings', 'Glutes', 'Calves'].includes(muscle))
-      return 'bg-red-950 text-red-400'
-    return 'bg-yellow-950 text-yellow-400'
+      return 'bg-red-950 text-red-400 hover:bg-red-950'
+    return 'bg-yellow-950 text-yellow-400 hover:bg-yellow-950'
   }
 
   return (
     <article
-      className='bg-card border border-border rounded-x1 px-4 py-3 mb-2 cursor-pointer hover:bg-secondary transition-colors'
+      className='bg-card border border-border rounded-xl px-4 py-3 mb-2 cursor-pointer hover:bg-secondary transition-colors select-none'
       onClick={onClick}
     >
       <header className='flex justify-between items-start'>
@@ -35,12 +38,12 @@ export default function WorkoutCard({ workout, onClick }) {
       {muscleGroups.length > 0 && (
         <div className='flex flex-wrap gap-1.5 mt-2'>
           {muscleGroups.map((muscle) => (
-            <span
+            <Badge
               key={muscle}
-              className={`text-[0.6875rem] font-medium px-2 py-0.5 rounded-full ${tagColor(muscle)}`}
+              className={`text-[0.6875rem] font-medium px-2 py-0.5 rounded-full border-none ${tagColor(muscle)}`}
             >
               {muscle}
-            </span>
+            </Badge>
           ))}
         </div>
       )}

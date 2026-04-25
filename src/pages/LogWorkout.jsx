@@ -134,8 +134,7 @@ export default function LogWorkout() {
     setActiveWorkout(null)
   }
 
-  if (loading)
-    return <div className='p-6 text-muted-foreground'>Loading...</div>
+  if (loading) return
 
   return (
     <>
@@ -148,7 +147,7 @@ export default function LogWorkout() {
         </p>
 
         <button
-          className='flex items-center gap-2 w-full px-4 py-3 bg-secondary border border-border rounded-xl text-sm text-foreground mb-3 cursor-pointer hover:opacity-80 transition-opacity'
+          className='flex items-center gap-2 w-50 px-4 py-3 bg-secondary border border-border rounded-xl text-sm text-foreground mb-3 cursor-pointer hover:opacity-80 transition-opacity'
           onClick={() => setShowBodyweightModal(true)}
         >
           <span className='text-muted-foreground'>Bodyweight</span>

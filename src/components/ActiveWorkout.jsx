@@ -1,4 +1,14 @@
 import { useState, useEffect, useRef } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 const MUSCLE_GROUPS = {
   Chest: ['Upper', 'Middle', 'Lower'],
@@ -15,13 +25,19 @@ const MUSCLE_GROUPS = {
 
 function MuscleTag({ muscle, onRemove }) {
   return (
-    <span className='muscle-tag'>
+    <Badge
+      variant='secondary'
+      className='flex items-center gap-1 text-xs font-medium bg-emerald-950 text-emerald-400 hover:bg-emerald-950'
+    >
       {muscle.muscle_group}
       {muscle.region ? ` · ${muscle.region}` : ''}
-      <button className='muscle-tag-remove' onClick={() => onRemove(muscle)}>
+      <button
+        onClick={() => onRemove(muscle)}
+        className='ml-0.5 text-emerald-400 hover:text-white cursor-pointer'
+      >
         &times;
       </button>
-    </span>
+    </Badge>
   )
 }
 
@@ -62,48 +78,57 @@ function MuscleSelector({ muscles, onChange }) {
   const regions = selectedGroup ? MUSCLE_GROUPS[selectedGroup] : []
 
   return (
-    <div className='muscle-selector'>
+    <div className='mb-3'>
       {muscles.length > 0 && (
-        <div className='muscle-tag-list'>
+        <div className='flex flex-wrap gap-1.5 mb-2'>
           {muscles.map((m, i) => (
             <MuscleTag key={i} muscle={m} onRemove={removeMuscle} />
           ))}
         </div>
       )}
-      <div className='muscle-selector-row'>
-        <select
-          className='add-exercise-input'
+      <div className='flex gap-2 items-center'>
+        <Select
           value={selectedGroup}
-          onChange={(e) => {
-            setSelectedGroup(e.target.value)
+          onValueChange={(val) => {
+            setSelectedGroup(val)
             setSelectedRegion('')
           }}
-          style={{ flex: 1 }}
         >
-          {Object.keys(MUSCLE_GROUPS).map((mg) => (
-            <option key={mg} value={mg}>
-              {mg}
-            </option>
-          ))}
-        </select>
-        {regions.length > 0 && (
-          <select
-            className='add-exercise-input'
-            value={selectedRegion}
-            onChange={(e) => setSelectedRegion(e.target.value)}
-            style={{ flex: 1 }}
-          >
-            <option value=''>(Not specified)</option>
-            {regions.map((r) => (
-              <option key={r} value={r}>
-                {r}
-              </option>
+          <SelectTrigger className='flex-1 bg-secondary border-border text-foreground'>
+            <SelectValue placeholder='Muscle group' />
+          </SelectTrigger>
+          <SelectContent className='bg-card border-border'>
+            {Object.keys(MUSCLE_GROUPS).map((mg) => (
+              <SelectItem key={mg} value={mg} className='text-foreground'>
+                {mg}
+              </SelectItem>
             ))}
-          </select>
+          </SelectContent>
+        </Select>
+
+        {regions.length > 0 && (
+          <Select value={selectedRegion} onValueChange={setSelectedRegion}>
+            <SelectTrigger className='flex-1 bg-secondary border-border text-foreground'>
+              <SelectValue placeholder='(Optional)' />
+            </SelectTrigger>
+            <SelectContent className='bg-card border-border'>
+              {regions.map((r) => (
+                <SelectItem key={r} value={r} className='text-foreground'>
+                  {r}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         )}
-        <button className='btn-small' onClick={addMuscle}>
+
+        <Button
+          variant='outline'
+          size='sm'
+          className='border-primary text-primary hover:bg-primary/10 cursor-pointer'
+          onClick={addMuscle}
+        >
           +
-        </button>
+        </Button>
       </div>
     </div>
   )
@@ -117,39 +142,73 @@ function ExerciseBlock({ exercise, onChange, onRemove }) {
     onChange({ ...exercise, sets: updatedSets })
   }
 
+  const blockInvalidKeys = (e) => {
+    const allowed = [
+      'Backspace',
+      'Delete',
+      'ArrowLeft',
+      'ArrowRight',
+      'Tab',
+      '.',
+    ]
+    if (!allowed.includes(e.key) && isNaN(Number(e.key))) e.preventDefault()
+  }
+
+  const blockInvalidKeysNoDecimal = (e) => {
+    const allowed = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab']
+    if (!allowed.includes(e.key) && isNaN(Number(e.key))) e.preventDefault()
+  }
+
   return (
-    <div className='exercise-block'>
-      <div className='exercise-block-header'>
-        <span className='exercise-block-name'>{exercise.name}</span>
-        <button className='btn-danger' onClick={onRemove}>
+    <div className='bg-secondary border border-border rounded-x1 p-4 mb-3'>
+      <div className='flex justify-between items-center mb-3'>
+        <span className='text-[0.9375rem] font-medium text-foreground'>
+          {exercise.name}
+        </span>
+        <Button
+          variant='outline'
+          size='sm'
+          className='border-destructive text-destructive hover:bg-destructive/10 cursor-pointer'
+          onClick={onRemove}
+        >
           Remove
-        </button>
+        </Button>
       </div>
+
       <MuscleSelector
         muscles={exercise.muscles || []}
         onChange={(muscles) => onChange({ ...exercise, muscles })}
       />
-      <div className='set-row'>
+
+      <div className='grid grid-cols-[2rem_1fr_1fr] gap-2 mb-1'>
         <div />
-        <div className='set-input-header'>Reps</div>
-        <div className='set-input-header'>Weight (kg)</div>
+        <div className='text-xs text-muted-foreground text-center'>Reps</div>
+        <div className='text-xs text-muted-foreground text-center'>
+          Weight (kg)
+        </div>
       </div>
+
       {exercise.sets.map((set, index) => (
-        <div className='set-row' key={index}>
-          <span className='set-label'>S{index + 1}</span>
-          <input
-            className='set-input'
+        <div key={index} className='grid grid-cols-[2rem_1fr_1fr] gap-2 mb-2'>
+          <span className='text-sm text-muted-foreground font-medium self-center'>
+            S{index + 1}
+          </span>
+          <Input
             type='number'
+            min='1'
             value={set.reps}
             placeholder='0'
+            onKeyDown={blockInvalidKeysNoDecimal}
+            className='bg-card border-border text-foreground text-center'
             onChange={(e) => updateSet(index, 'reps', e.target.value)}
           />
-          <input
-            className='set-input'
+          <Input
             type='number'
-            step='0.5'
+            min='1'
             value={set.weight}
             placeholder='0'
+            onKeyDown={blockInvalidKeys}
+            className='bg-card border-border text-foreground text-center'
             onChange={(e) => updateSet(index, 'weight', e.target.value)}
           />
         </div>
@@ -212,15 +271,21 @@ export default function ActiveWorkout({
   }
 
   return (
-    <div className={`active-workout-panel ${isOpen ? 'open' : ''}`}>
-      <div className='active-workout'>
-        <div className='active-workout-header'>
-          <button className='detail-back-btn' onClick={onCancel}>
-            {'\u2192'}
-          </button>
-          <span className='active-workout-title'>
+    <div
+      className={`fixed top-0 left-1/2 w-full max-w-[430px] h-screen bg-card z-50 overflox-y-auto transition-transform duration-300
+        ${isOpen ? '-translate-x-1/2' : 'translate-x-[calc(-50%+100%)]'}`}
+    >
+      <div className='px-6 pt-6 pb-24'>
+        <div className='flex items-center gap-3 mb-6'>
+          <Button
+            className='text-primary text-xl bg-transparent border-none cursor-pointer'
+            onClick={onCancel}
+          >
+            &rarr;
+          </Button>
+          <h1 className='text-[1.375rem] font-medium text-foreground'>
             {lastWorkoutName.current}
-          </span>
+          </h1>
         </div>
 
         {exercises.map((exercise, index) => (
@@ -232,38 +297,51 @@ export default function ActiveWorkout({
           />
         ))}
 
-        <div className='log-section-title' style={{ marginTop: '1rem' }}>
+        <p className='text-xs font-medium text-muted-foreground uppercase tracking-wide mt-5 mb-3'>
           Add exercise
-        </div>
-        <input
-          className='add-exercise-input'
+        </p>
+
+        <Input
           type='text'
           placeholder='Exercise name'
           value={exerciseName}
           onChange={(e) => setExerciseName(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && addExercise()}
+          className='bg-secondary border-border text-foreground mb-2'
         />
-        <div className='add-exercise-row'>
-          <input
-            className='set-input'
+
+        <div className='flex gap-2 mb-5'>
+          <Input
             type='number'
             min='1'
             max='10'
             value={setCount}
             onChange={(e) => setSetCount(parseInt(e.target.value))}
-            style={{ width: '4rem' }}
+            className='bg-secondary border-border text-foreground w-20 text-center'
             title='Number of sets'
           />
-          <button className='btn-small' onClick={addExercise}>
-            Add
-          </button>
+          <Button
+            variant='outline'
+            className='flex-1 border-primary text-primary hover:bg-primary/10 cursor-pointer'
+            onClick={addExercise}
+          >
+            Add exercise
+          </Button>
         </div>
-        <button className='btn-primary' onClick={handleSave}>
+
+        <Button
+          className='w-full bg-primary text-primary-foreground hover:opacity-90 mb-3 cursor-pointer'
+          onClick={handleSave}
+        >
           Save workout
-        </button>
-        <button className='btn-secondary' onClick={onCancel}>
+        </Button>
+        <Button
+          variant='outline'
+          className='w-full border-border text-muted-foreground cursor-pointer'
+          onClick={onCancel}
+        >
           Cancel
-        </button>
+        </Button>
       </div>
     </div>
   )
