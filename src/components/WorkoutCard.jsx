@@ -26,17 +26,17 @@ export default function WorkoutCard({ workout, onClick }) {
 
   return (
     <article
-      className='bg-card border border-border rounded-xl px-4 py-3 mb-2 cursor-pointer hover:bg-secondary transition-colors select-none'
+      className='bg-card border border-border rounded-xl px-4 py-3 mb-2 cursor-pointer hover:bg-secondary transition-colors active:scale-97 transition-all duration-100 select-none'
       onClick={onClick}
     >
-      <header className='flex justify-between items-start'>
+      <div className='flex justify-between items-start'>
         <h3 className='text-[0.9375rem] font-medium text-foreground'>
           {workout.name}
         </h3>
-        <span className='text-xs text-muted-foreground'>{workout.date}</span>
-      </header>
+        <span className='text-xs text-primary'>{workout.date}</span>
+      </div>
       {muscleGroups.length > 0 && (
-        <div className='flex flex-wrap gap-1.5 mt-2'>
+        <div className='flex flex-wrap gap-1.5 mt-1'>
           {muscleGroups.map((muscle) => (
             <Badge
               key={muscle}
@@ -47,7 +47,7 @@ export default function WorkoutCard({ workout, onClick }) {
           ))}
         </div>
       )}
-      <p className='text-xs text-muted-foreground mt-2'>
+      <p className='text-xs text-muted-foreground mt-1'>
         {workout.exercises.length} exercises · {totalSets} sets
       </p>
     </article>

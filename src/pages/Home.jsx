@@ -4,7 +4,7 @@ import WorkoutCard from '../components/WorkoutCard'
 import WorkoutDetail from '../components/WorkoutDetail'
 import { Card, CardContent } from '@/components/ui/card'
 
-export default function History() {
+export default function Home() {
   const [workouts, setWorkouts] = useState([])
   const [selectedWorkout, setSelectedWorkout] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -101,9 +101,9 @@ export default function History() {
         <p className='text-sm text-muted-foreground'>Week 18 · April 2026</p>
       </div>
 
-      <div className='grid grid-cols-2 gap-3 px-6 pb-3'>
+      <div className='grid grid-cols-2 gap-3 px-6 pb-5'>
         <Card className='bg-secondary border-border'>
-          <CardContent className='p-4'>
+          <CardContent className='p-2'>
             <div className='text-[1.375rem] font-medium text-primary'>
               + 4.2 %
             </div>
@@ -123,14 +123,14 @@ export default function History() {
             })
           }
         >
-          <CardContent className='p-4'>
+          <CardContent className='p-2'>
             {bodyweightChange !== null ? (
               <>
                 <div
                   className={`text-[1.375rem] font-medium ${bodyweightChange[bodyweightView] <= 0 ? 'text-primary' : 'text-destructive'}`}
                 >
                   {bodyweightChange[bodyweightView] > 0 ? '+ ' : '- '}
-                  {Math.abs(bodyweightChange[bodyweightView]).toFixed(1)}{' '}
+                  {Math.abs(bodyweightChange[bodyweightView]).toFixed(1)} kg
                   <keygen />
                 </div>
                 <div className='text-xs text-muted-foreground mt-1'>

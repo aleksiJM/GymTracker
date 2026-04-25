@@ -73,12 +73,12 @@ export default function WorkoutDetail({ workout, onClose, onDelete }) {
           </h1>
         </div>
 
-        <div className='px-6 py-5'>
+        <div className='px-6 py-5 select-none'>
           {!displayed ? (
             <div />
           ) : (
             <>
-              <p className='text-sm text-muted-foreground mb-5'>
+              <p className='text-sm text-primary mb-5'>
                 {totalSets} sets · {totalReps} reps
               </p>
 
@@ -95,25 +95,13 @@ export default function WorkoutDetail({ workout, onClose, onDelete }) {
                       className={`flex jusitify-between items-center px-4 py-3
                         ${i < displayed.exercises.length - 1 ? 'border-b border-border' : ''}`}
                     >
-                      <div>
+                      <div className='flex-1 min-w-0 pr-4'>
                         <div className='text-[0.9375rem] font-medium text-foreground'>
                           {exercise.name}
                         </div>
-                        {exercise.exercise_muscles?.length > 0 && (
-                          <div className='text-xs text-muted-foreground mt-0.5'>
-                            {exercise.exercise_muscles.map((m, i) => (
-                              <span key={i}>
-                                {m.muscle_group}
-                                {m.region ? ` · ${m.region}` : ''}
-                                {i < exercise.exercise_muscles.length - 1
-                                  ? ', '
-                                  : ''}
-                              </span>
-                            ))}
-                          </div>
-                        )}
                         <div className='text-xs text-muted-foreground mt-0.5'>
-                          {exercise.sets?.length || 0} sets
+                          {exercise.sets?.length || 0} sets ·{' '}
+                          {exercise.reps?.length || 0} reps
                         </div>
                       </div>
                       <div className='text-[0.9375rem] font-medium text-primary'>

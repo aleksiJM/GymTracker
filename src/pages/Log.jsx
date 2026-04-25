@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import ActiveWorkout from '../components/ActiveWorkout'
 import BodyweightModal from '../components/BodyweightModal'
+import { Button } from '@/components/ui/button'
 
-export default function LogWorkout() {
+export default function Log() {
   const [showBodyweightModal, setShowBodyweightModal] = useState(false)
   const [activeWorkout, setActiveWorkout] = useState(null)
   const [showNameModal, setShowNameModal] = useState(false)
@@ -139,15 +140,13 @@ export default function LogWorkout() {
   return (
     <>
       <div className='px-6 pt-6 pb-4'>
-        <h1 className='text-[1.375rem] font-medium text-foreground'>
-          Log workout
-        </h1>
+        <h1 className='text-[1.375rem] font-medium text-foreground'>Log</h1>
         <p className='text-sm text-muted-foreground mb-5'>
-          Start a new session or repeat a previous one
+          Start a new workout or track bodyweight
         </p>
 
-        <button
-          className='flex items-center gap-2 w-50 px-4 py-3 bg-secondary border border-border rounded-xl text-sm text-foreground mb-3 cursor-pointer hover:opacity-80 transition-opacity'
+        <Button
+          className='p-4 flex items-center gap-2 w-[50%] bg-secondary border border-border rounded-xl text-sm text-foreground mb-3 cursor-pointer hover:opacity-80 transition-opacity'
           onClick={() => setShowBodyweightModal(true)}
         >
           <span className='text-muted-foreground'>Bodyweight</span>
@@ -155,14 +154,14 @@ export default function LogWorkout() {
             {bodyweight ? `${bodyweight} kg` : 'Not set'}
           </span>
           <span className='ml-auto text-muted-foreground'>&#x270E;</span>
-        </button>
+        </Button>
 
-        <button
-          className='w-full py-3.5 bg-primary text-primary-foreground rounded-xl text-[0.9375rem] font-medium cursor-pointer hover:opacity-90 transition-opacity mb-5'
+        <Button
+          className='p-6 w-full bg-primary text-primary-foreground rounded-xl text-[0.9375rem] font-medium cursor-pointer hover:opacity-90 transition-opacity mb-5'
           onClick={() => setShowNameModal(true)}
         >
           + Start new workout
-        </button>
+        </Button>
 
         <p className='text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3'>
           Repeat previous
@@ -176,13 +175,13 @@ export default function LogWorkout() {
           recentWorkouts.map((workout) => (
             <div
               key={workout.id}
-              className='bg-card border border-border rounded-xl px-4 py-3 mb-2 cursor-pointer hover:bg-secondary transition-colors'
+              className='bg-card border border-border rounded-xl px-4 py-3 mb-2 cursor-pointer hover:bg-secondary transition-colors active:scale-97 transition-all duration-100 select-none'
               onClick={() => repeatWorkout(workout)}
             >
               <div className='flex justify-between items-center'>
-                <span className='text-[0.9375rem] font-medium text-foreground'>
+                <h3 className='text-[0.9375rem] font-medium text-foreground'>
                   {workout.name}
-                </span>
+                </h3>
                 <span className='text-xs text-primary'>Repeat &rarr;</span>
               </div>
               <p className='text-xs text-muted-foreground mt-1'>
@@ -215,18 +214,19 @@ export default function LogWorkout() {
               autoFocus
             />
             <div className='grid grid-cols-2 gap-3'>
-              <button
-                className='py-3 border border-border rounded-xl text-muted-foreground cursor-pointer hover:bg-secondary transition-colors'
+              <Button
+                variant='outline'
+                className='p-5 border-border text-muted-foreground cursor-pointer'
                 onClick={() => setShowNameModal(false)}
               >
                 Cancel
-              </button>
-              <button
-                className='py-3 bg-primary text-primary-foreground rounded-xl font-medium cursor-pointer hover:opacity-90 transition-opacity'
+              </Button>
+              <Button
+                className='p-5 bg-primary text-primary-foreground rounded-xl font-medium cursor-pointer hover:opacity-90 transition-opacity'
                 onClick={startNew}
               >
                 Start
-              </button>
+              </Button>
             </div>
           </div>
         </div>

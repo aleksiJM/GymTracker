@@ -47,7 +47,7 @@ export default function BodyweightModal({ current, onSave, onClose }) {
             placeholder='e.g. 80.0'
             value={value}
             onChange={(e) => setValue(e.target.value)}
-            className='bg-secondary border-border text-foreground mb-2'
+            className='bg-secondary border-border text-foreground mb-2 w-[50%]'
             autofocus
           />
           <p className='text-xs text-muted-foreground'>

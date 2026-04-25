@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import ExercisePicker from './ExercisePicker'
 
 const MUSCLE_GROUPS = {
   Chest: ['Upper', 'Middle', 'Lower'],
@@ -228,6 +229,7 @@ export default function ActiveWorkout({
   const [exerciseName, setExerciseName] = useState('')
   const [setCount, setSetCount] = useState(3)
   const lastWorkoutName = useRef(workoutName)
+  const [showPicker, setShowPicker] = useState(false)
 
   useEffect(() => {
     if (isOpen) {
@@ -238,16 +240,14 @@ export default function ActiveWorkout({
     }
   }, [isOpen])
 
-  const addExercise = () => {
-    if (!exerciseName.trim()) return
+  const addExercise = (libraryExercise) => {
     const newExercise = {
-      name: exerciseName.trim(),
-      muscles: [],
-      sets: Array.from({ length: setCount }, () => ({ reps: '', weight: '' })),
+      name: libraryExercise.name,
+      muscles: libraryExercise.exercise_library_muscles || [],
+      sets: Array.from({ length: 3 }, () => ({ reps: '', weight: '' })),
     }
     setExercises((prev) => [...prev, newExercise])
-    setExerciseName('')
-    setSetCount(3)
+    setShowPicker(false)
   }
 
   const updateExercise = (index, updated) => {
@@ -301,33 +301,13 @@ export default function ActiveWorkout({
           Add exercise
         </p>
 
-        <Input
-          type='text'
-          placeholder='Exercise name'
-          value={exerciseName}
-          onChange={(e) => setExerciseName(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && addExercise()}
-          className='bg-secondary border-border text-foreground mb-2'
-        />
-
-        <div className='flex gap-2 mb-5'>
-          <Input
-            type='number'
-            min='1'
-            max='10'
-            value={setCount}
-            onChange={(e) => setSetCount(parseInt(e.target.value))}
-            className='bg-secondary border-border text-foreground w-20 text-center'
-            title='Number of sets'
-          />
-          <Button
-            variant='outline'
-            className='flex-1 border-primary text-primary hover:bg-primary/10 cursor-pointer'
-            onClick={addExercise}
-          >
-            Add exercise
-          </Button>
-        </div>
+        <Button
+          variant='outline'
+          className='w-full border-primary text-primary hover:bg-primary/10 cursor-pointer mb-3'
+          onClick={() => setShowPicker(true)}
+        >
+          + Add exercise
+        </Button>
 
         <Button
           className='w-full bg-primary text-primary-foreground hover:opacity-90 mb-3 cursor-pointer'
@@ -335,6 +315,7 @@ export default function ActiveWorkout({
         >
           Save workout
         </Button>
+
         <Button
           variant='outline'
           className='w-full border-border text-muted-foreground cursor-pointer'
@@ -342,6 +323,12 @@ export default function ActiveWorkout({
         >
           Cancel
         </Button>
+
+        <ExercisePicker
+          isOpen={showPicker}
+          onClose={() => setShowPicker(false)}
+          onSelect={addExercise}
+        />
       </div>
     </div>
   )
