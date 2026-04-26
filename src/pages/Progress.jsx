@@ -1,5 +1,3 @@
-function Progress() {
-  return <div className='page'>Progress</div>
+export default function Progress() {
+  return
 }
-
-export default Progress

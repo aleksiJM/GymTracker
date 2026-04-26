@@ -144,9 +144,9 @@ function CreateExerciseForm({ name, onCreated }) {
 
         {regions.length > 0 && (
           <Select value={selectedRegion} onValueChange={setSelectedRegion}>
-            <SelectedTrigger className='flex-1 bg-card border-border text-foreground'>
+            <SelectTrigger className='flex-1 bg-card border-border text-foreground'>
               <SelectValue placeholder='Region' />
-            </SelectedTrigger>
+            </SelectTrigger>
             <SelectContent className='bg-card border-border'>
               {regions.map((r) => (
                 <SelectItem key={r} value={r} className='text-foreground'>
