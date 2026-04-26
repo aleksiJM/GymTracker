@@ -176,11 +176,6 @@ function ExerciseBlock({ exercise, onChange, onRemove }) {
         </Button>
       </div>
 
-      <MuscleSelector
-        muscles={exercise.muscles || []}
-        onChange={(muscles) => onChange({ ...exercise, muscles })}
-      />
-
       <div className='grid grid-cols-[2rem_1fr_1fr] gap-2 mb-1'>
         <div />
         <div className='text-xs text-muted-foreground text-center'>Reps</div>
@@ -303,14 +298,14 @@ export default function ActiveWorkout({
 
         <Button
           variant='outline'
-          className='w-full border-primary text-primary hover:bg-primary/10 cursor-pointer mb-3'
+          className='p-6 w-full border-primary text-primary text-[0.9375rem] font-medium hover:bg-primary/10 cursor-pointer mb-2'
           onClick={() => setShowPicker(true)}
         >
           + Add exercise
         </Button>
 
         <Button
-          className='w-full bg-primary text-primary-foreground hover:opacity-90 mb-3 cursor-pointer'
+          className='p-6 w-full bg-primary text-primary-foreground text-[0.9375rem] font-medium hover:opacity-90 mb-2 cursor-pointer'
           onClick={handleSave}
         >
           Save workout
@@ -318,7 +313,7 @@ export default function ActiveWorkout({
 
         <Button
           variant='outline'
-          className='w-full border-border text-muted-foreground cursor-pointer'
+          className='p-6 w-full border-border text-muted-foreground text-[0.9375rem] font-medium cursor-pointer'
           onClick={onCancel}
         >
           Cancel

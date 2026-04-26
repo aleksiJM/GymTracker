@@ -1,17 +1,23 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import ActiveWorkout from '../components/ActiveWorkout'
-import BodyweightModal from '../components/BodyweightModal'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
 export default function Log() {
-  const [showBodyweightModal, setShowBodyweightModal] = useState(false)
   const [activeWorkout, setActiveWorkout] = useState(null)
   const [showNameModal, setShowNameModal] = useState(false)
   const [newWorkoutName, setNewWorkoutName] = useState('')
   const [recentWorkouts, setRecentWorkouts] = useState([])
   const [loading, setLoading] = useState(true)
-  const [bodyweight, setBodyweight] = useState(null)
+  const [bodyweight, setBodyweight] = useState('')
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     const fetchWorkouts = async () => {
@@ -42,7 +48,8 @@ export default function Log() {
         .order('created_at', { ascending: false })
         .limit(1)
 
-      if (!error && data && data.length > 0) setBodyweight(data[0].weight)
+      if (!error && data && data.length > 0)
+        setBodyweight(String(data[0].weight))
     }
 
     fetchWorkouts()
@@ -135,6 +142,23 @@ export default function Log() {
     setActiveWorkout(null)
   }
 
+  const handleSaveBodyweight = async () => {
+    if (!bodyweight) return
+    setSaving(true)
+
+    const { error } = await supabase
+      .from('bodyweight')
+      .insert({ weight: parseFloat(bodyweight) })
+
+    if (error) {
+      console.error(error)
+      setSaving(false)
+      return
+    }
+
+    setSaving(false)
+  }
+
   if (loading) return
 
   return (
@@ -142,19 +166,32 @@ export default function Log() {
       <div className='px-6 pt-6 pb-4'>
         <h1 className='text-[1.375rem] font-medium text-foreground'>Log</h1>
         <p className='text-sm text-muted-foreground mb-5'>
-          Start a new workout or track bodyweight
+          Start a new workout and track bodyweight
         </p>
 
-        <Button
-          className='p-4 flex items-center gap-2 w-[50%] bg-secondary border border-border rounded-xl text-sm text-foreground mb-3 cursor-pointer hover:opacity-80 transition-opacity'
-          onClick={() => setShowBodyweightModal(true)}
-        >
-          <span className='text-muted-foreground'>Bodyweight</span>
-          <span className='font-medium text-primary'>
-            {bodyweight ? `${bodyweight} kg` : 'Not set'}
-          </span>
-          <span className='ml-auto text-muted-foreground'>&#x270E;</span>
-        </Button>
+        <p className='text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2'>
+          Bodyweight
+        </p>
+        <div className='flex gap-2 mb-5'>
+          <Input
+            type='number'
+            placeholder='e.g. 80.0'
+            value={bodyweight}
+            onChange={(e) => setBodyweight(e.target.value)}
+            className='bg-secondary border-border text-foreground flex-1 text-center'
+          />
+          <Button
+            onClick={handleSaveBodyweight}
+            disabled={saving}
+            className='bg-primary text-primary-foreground flex-1'
+          >
+            {saving ? 'Saving...' : 'Update'}
+          </Button>
+        </div>
+
+        <p className='text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2'>
+          Create workout
+        </p>
 
         <Button
           className='p-6 w-full bg-primary text-primary-foreground rounded-xl text-[0.9375rem] font-medium cursor-pointer hover:opacity-90 transition-opacity mb-5'
@@ -163,7 +200,7 @@ export default function Log() {
           + Start new workout
         </Button>
 
-        <p className='text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3'>
+        <p className='text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2'>
           Repeat previous
         </p>
 
@@ -175,7 +212,7 @@ export default function Log() {
           recentWorkouts.map((workout) => (
             <div
               key={workout.id}
-              className='bg-card border border-border rounded-xl px-4 py-3 mb-2 cursor-pointer hover:bg-secondary transition-colors active:scale-97 transition-all duration-100 select-none'
+              className='bg-card border border-border rounded-xl px-4 py-3 mb-2 cursor-pointer hover:bg-secondary active:scale-95 transition-all duration-100 select-none'
               onClick={() => repeatWorkout(workout)}
             >
               <div className='flex justify-between items-center'>
@@ -193,54 +230,37 @@ export default function Log() {
       </div>
 
       {showNameModal && (
-        <div
-          className='fixed inset-0 bg-black/50 flex items-end justify-center z-50'
-          onClick={() => setShowNameModal(false)}
-        >
-          <div
-            className='bg-card rounded-t-2xl p-6 w-full max-w-[430px]'
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 className='text-[1.0625rem] font-medium text-foreground mb-4'>
-              New workout
-            </h3>
-            <input
-              className='w-full px-4 py-3 bg-secondary border border-border rounded-xl text-foreground text-[0.9375rem] mb-4 outline-none focus:border-primary'
+        <Dialog open={showNameModal} onOpenChange={setShowNameModal}>
+          <DialogContent className='bg-card border-border max-w-[400px]'>
+            <DialogHeader>
+              <DialogTitle className='text-foreground'>New workout</DialogTitle>
+            </DialogHeader>
+            <Input
               type='text'
               placeholder='e.g. Push day'
               value={newWorkoutName}
               onChange={(e) => setNewWorkoutName(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && startNew()}
+              className='bg-secondary border-border text-foreground'
               autoFocus
             />
             <div className='grid grid-cols-2 gap-3'>
               <Button
                 variant='outline'
-                className='p-5 border-border text-muted-foreground cursor-pointer'
+                className='border-border text-muted-foreground cursor-pointer'
                 onClick={() => setShowNameModal(false)}
               >
                 Cancel
               </Button>
               <Button
-                className='p-5 bg-primary text-primary-foreground rounded-xl font-medium cursor-pointer hover:opacity-90 transition-opacity'
+                className='bg-primary text-primary-foreground cursor-pointer hover:opacity-90'
                 onClick={startNew}
               >
                 Start
               </Button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {showBodyweightModal && (
-        <BodyweightModal
-          current={bodyweight}
-          onSave={(val) => {
-            setBodyweight(val)
-            setShowBodyweightModal(false)
-          }}
-          onClose={() => setShowBodyweightModal(false)}
-        />
+          </DialogContent>
+        </Dialog>
       )}
 
       <ActiveWorkout

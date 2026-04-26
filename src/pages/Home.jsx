@@ -155,7 +155,7 @@ export default function Home() {
       </div>
 
       <div className='px-6'>
-        <p className='text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3'>
+        <p className='text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2'>
           Sessions
         </p>
         {workouts.length === 0 ? (

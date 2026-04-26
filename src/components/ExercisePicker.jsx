@@ -10,6 +10,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
 const MUSCLE_GROUPS = {
   Chest: ['Upper', 'Middle', 'Lower'],
@@ -103,10 +109,6 @@ function CreateExerciseForm({ name, onCreated }) {
 
   return (
     <div className='border border-border rounded-xl p-4 mb-4 bg-secondary'>
-      <p className='text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3'>
-        Create "{name}"
-      </p>
-
       {muscles.length > 0 && (
         <div className='flex flex-wrap gap-1.5 mb-3'>
           {muscles.map((m, i) => (
@@ -122,7 +124,7 @@ function CreateExerciseForm({ name, onCreated }) {
         </div>
       )}
 
-      <div className='flex gap-2 mb-3'>
+      <div className='flex gap-2 mb-3 items-center'>
         <Select
           value={selectedGroup}
           onValueChange={(val) => {
@@ -145,7 +147,7 @@ function CreateExerciseForm({ name, onCreated }) {
         {regions.length > 0 && (
           <Select value={selectedRegion} onValueChange={setSelectedRegion}>
             <SelectTrigger className='flex-1 bg-card border-border text-foreground'>
-              <SelectValue placeholder='Region' />
+              <SelectValue placeholder='Not specified' />
             </SelectTrigger>
             <SelectContent className='bg-card border-border'>
               {regions.map((r) => (
@@ -159,8 +161,8 @@ function CreateExerciseForm({ name, onCreated }) {
 
         <Button
           variant='outline'
-          size='sm'
-          className='border-primary text-primary hover:bg-primary/10'
+          size='icon'
+          className='border-primary text-primary hover:bg-primary/10 shrink-0 text-lg pb-0.5'
           onClick={addMuscle}
         >
           +
@@ -236,51 +238,31 @@ export default function ExercisePicker({ isOpen, onClose, onSelect }) {
   }
 
   return (
-    <>
-      {isOpen && (
-        <div className='fixed inset-0 bg-black/50 z-50' onClick={onClose} />
-      )}
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className='bg-card border-border max-w-[400px] max-h-[80vh] flex flex-col'>
+        <DialogHeader>
+          <DialogTitle className='text-foreground'>Add exercise</DialogTitle>
+        </DialogHeader>
 
-      <div
-        className={`fixed left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-card border-t border-border rounded-t-2x1 z-50 transition-transform duration-300
-                ${isOpen ? 'bottom-0' : '-bottom-full'}`}
-        style={{ maxHeight: '80vh' }}
-      >
-        <div className='flex items-center justify-between px-6 pt-5 pb-3'>
-          <h2 className='text-[1.0625rem] font-medium text-foreground'>
-            Add exercise
-          </h2>
-          <Button
-            className='text-muted-foreground hover:text-foreground cursor-pointer bg-transparent border-none text-xl'
-            onClick={onClose}
-          >
-            &times;
-          </Button>
-        </div>
+        <Input
+          placeholder='Search or create exercise...'
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className='bg-secondary border-border text-foreground'
+          autoFocus
+        />
 
-        <div className='px-6 pb-3'>
-          <Input
-            placeholder='Search or create exercise...'
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className='bg-secondary border-border text-foreground'
-            autoFocus
-          />
-        </div>
-
-        <div
-          className='overflox-y-auto px-6 pb-6'
-          style={{ maxHeight: 'calc(80vh - 130px)' }}
-        >
+        <div className='overflow-y-auto flex-1 -mx-1 px-1'>
           {search && !exactMatch && (
             <CreateExerciseForm name={search} onCreated={handleCreated} />
           )}
 
           {loading ? (
-            <p className='text-sm text-muted-foreground'>Loading...</p>
-          ) : filtered.length === 0 && exactMatch ? null : filtered.length ===
-            0 ? (
-            <p className='text-sm text-muted-foreground'>No exercises found</p>
+            <p className='text-sm text-muted-foreground py-2'>Loading...</p>
+          ) : filtered.length === 0 ? (
+            <p className='text-sm text-muted-foreground py-2'>
+              No exercises found
+            </p>
           ) : (
             filtered.map((exercise) => (
               <div
@@ -307,18 +289,18 @@ export default function ExercisePicker({ isOpen, onClose, onSelect }) {
                   )}
                 </div>
                 <div className='flex items-center gap-2 shrink-0'>
-                  <Button
-                    className='text-muted-foreground hover:text-destructive transition-colors cursor-pointer bg-transparent border-none p-1'
+                  <button
+                    className='text-primary text-[1rem] hover:text-destructive transition-colors cursor-pointer bg-transparent border-none px-2'
                     onClick={(e) => handleDelete(e, exercise.id)}
                   >
                     &times;
-                  </Button>
+                  </button>
                 </div>
               </div>
             ))
           )}
         </div>
-      </div>
-    </>
+      </DialogContent>
+    </Dialog>
   )
 }
