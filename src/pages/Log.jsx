@@ -183,7 +183,7 @@ export default function Log() {
           <Button
             onClick={handleSaveBodyweight}
             disabled={saving}
-            className='bg-primary text-primary-foreground flex-1'
+            className='bg-primary text-primary-foreground flex-1 cursor-pointer hover:opacity-90 transition-opacity'
           >
             {saving ? 'Saving...' : 'Update'}
           </Button>

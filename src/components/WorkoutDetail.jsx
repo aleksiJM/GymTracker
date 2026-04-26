@@ -101,7 +101,11 @@ export default function WorkoutDetail({ workout, onClose, onDelete }) {
                         </div>
                         <div className='text-xs text-muted-foreground mt-0.5'>
                           {exercise.sets?.length || 0} sets ·{' '}
-                          {exercise.reps?.length || 0} reps
+                          {exercise.sets?.reduce(
+                            (sum, set) => sum + (set.reps || 0),
+                            0
+                          ) || 0}{' '}
+                          reps
                         </div>
                       </div>
                       <div className='text-[0.9375rem] font-medium text-primary'>
