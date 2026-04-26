@@ -221,6 +221,20 @@ export default function ExercisePicker({ isOpen, onClose, onSelect }) {
     onClose()
   }
 
+  const handleDelete = async (e, exerciseId) => {
+    e.stopPropagation()
+    const { error } = await supabase
+      .from('exercise_library')
+      .delete()
+      .eq('id', exerciseId)
+
+    if (error) {
+      console.error(error)
+      return
+    }
+    setExercises((prev) => prev.filter((ex) => ex.id !== exerciseId))
+  }
+
   return (
     <>
       {isOpen && (
@@ -274,7 +288,7 @@ export default function ExercisePicker({ isOpen, onClose, onSelect }) {
                 className='flex justify-between items-center py-3 border-b border-border cursor-pointer hover:bg-secondary px-2 rounded-lg transition-colors'
                 onClick={() => handleSelect(exercise)}
               >
-                <div>
+                <div className='flex-1 min-w-0 pr-2'>
                   <p className='text-[0.9375rem] font-medium text-foreground'>
                     {exercise.name}
                   </p>
@@ -292,7 +306,14 @@ export default function ExercisePicker({ isOpen, onClose, onSelect }) {
                     </div>
                   )}
                 </div>
-                <span className='text-xs text-primary ml-2'>Add &rarr;</span>
+                <div className='flex items-center gap-2 shrink-0'>
+                  <Button
+                    className='text-muted-foreground hover:text-destructive transition-colors cursor-pointer bg-transparent border-none p-1'
+                    onClick={(e) => handleDelete(e, exercise.id)}
+                  >
+                    &times;
+                  </Button>
+                </div>
               </div>
             ))
           )}
