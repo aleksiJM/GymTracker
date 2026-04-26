@@ -24,6 +24,7 @@ const MUSCLE_GROUPS = {
   Core: [],
 }
 
+/*
 function MuscleTag({ muscle, onRemove }) {
   return (
     <Badge
@@ -134,8 +135,28 @@ function MuscleSelector({ muscles, onChange }) {
     </div>
   )
 }
+*/
 
 function ExerciseBlock({ exercise, onChange, onRemove }) {
+  const addSet = () => {
+    const lastSet = exercise.sets[exercise.sets.length - 1]
+    onChange({
+      ...exercise,
+      sets: [
+        ...exercise.sets,
+        { reps: lastSet?.reps || '', weight: lastSet?.weight || '' },
+      ],
+    })
+  }
+
+  const removeSet = (index) => {
+    if (exercise.sets.length === 1) return
+    onChange({
+      ...exercise,
+      sets: exercise.sets.filter((_, i) => i !== index),
+    })
+  }
+
   const updateSet = (index, field, value) => {
     const updatedSets = exercise.sets.map((set, i) =>
       i === index ? { ...set, [field]: value } : set
@@ -176,19 +197,19 @@ function ExerciseBlock({ exercise, onChange, onRemove }) {
         </Button>
       </div>
 
-      <div className='grid grid-cols-[2rem_1fr_1fr] gap-2 mb-1'>
-        <div />
+      <div className='grid grid-cols-[1fr_1fr_1.5rem] gap-2 mb-1'>
         <div className='text-xs text-muted-foreground text-center'>Reps</div>
         <div className='text-xs text-muted-foreground text-center'>
           Weight (kg)
         </div>
+        <div />
       </div>
 
       {exercise.sets.map((set, index) => (
-        <div key={index} className='grid grid-cols-[2rem_1fr_1fr] gap-2 mb-2'>
-          <span className='text-sm text-muted-foreground font-medium self-center'>
-            S{index + 1}
-          </span>
+        <div
+          key={index}
+          className='grid grid-cols-[1fr_1fr_1.5rem] gap-2 mb-2 items-center'
+        >
           <Input
             type='number'
             min='1'
@@ -207,8 +228,23 @@ function ExerciseBlock({ exercise, onChange, onRemove }) {
             className='bg-card border-border text-foreground text-center'
             onChange={(e) => updateSet(index, 'weight', e.target.value)}
           />
+          <Button
+            className='text-muted-foreground hover:text-destructive transition-colors cursor-pointer bg-transparent border-none text-lg leading-none pb-1'
+            onClick={() => removeSet(index)}
+            disabled={exercise.sets.length === 1}
+          >
+            &times;
+          </Button>
         </div>
       ))}
+
+      <Button
+        variant='outline'
+        className='w-full border-border text-muted-foreground hover:text-foreground mt-1'
+        onClick={addSet}
+      >
+        + Add set
+      </Button>
     </div>
   )
 }
@@ -222,7 +258,7 @@ export default function ActiveWorkout({
 }) {
   const [exercises, setExercises] = useState(initialExercises)
   const [exerciseName, setExerciseName] = useState('')
-  const [setCount, setSetCount] = useState(3)
+  const [setCount, setSetCount] = useState(1)
   const lastWorkoutName = useRef(workoutName)
   const [showPicker, setShowPicker] = useState(false)
 
@@ -239,7 +275,7 @@ export default function ActiveWorkout({
     const newExercise = {
       name: libraryExercise.name,
       muscles: libraryExercise.exercise_library_muscles || [],
-      sets: Array.from({ length: 3 }, () => ({ reps: '', weight: '' })),
+      sets: [{ reps: '', weight: '' }],
     }
     setExercises((prev) => [...prev, newExercise])
     setShowPicker(false)
@@ -267,22 +303,22 @@ export default function ActiveWorkout({
 
   return (
     <div
-      className={`fixed top-0 left-1/2 w-full max-w-[430px] h-screen bg-card z-50 overflox-y-auto transition-transform duration-300
+      className={`fixed top-0 left-1/2 w-full max-w-[430px] h-screen bg-card z-50 flex flex-col transition-transform duration-300
         ${isOpen ? '-translate-x-1/2' : 'translate-x-[calc(-50%+100%)]'}`}
     >
-      <div className='px-6 pt-6 pb-24'>
-        <div className='flex items-center gap-3 mb-6'>
-          <Button
-            className='text-primary text-xl bg-transparent border-none cursor-pointer'
-            onClick={onCancel}
-          >
-            &rarr;
-          </Button>
-          <h1 className='text-[1.375rem] font-medium text-foreground'>
-            {lastWorkoutName.current}
-          </h1>
-        </div>
+      <div className='flex items-center gap-3 px-6 py-5 border-b border-border shrink-0 mb-2'>
+        <button
+          className='text-primary text-xl bg-transparent border-none cursor-pointer'
+          onClick={onCancel}
+        >
+          &rarr;
+        </button>
+        <h1 className='text-[1.375rem] font-medium text-foreground'>
+          {lastWorkoutName.current}
+        </h1>
+      </div>
 
+      <div className='flex-1 overflow-y-auto px-6 py-4'>
         {exercises.map((exercise, index) => (
           <ExerciseBlock
             key={index}
@@ -292,39 +328,40 @@ export default function ActiveWorkout({
           />
         ))}
 
-        <p className='text-xs font-medium text-muted-foreground uppercase tracking-wide mt-5 mb-3'>
+        <p className='text-xs font-medium text-muted-foreground uppercase tracking-wide mt-2 mb-3'>
           Add exercise
         </p>
 
         <Button
           variant='outline'
-          className='p-6 w-full border-primary text-primary text-[0.9375rem] font-medium hover:bg-primary/10 cursor-pointer mb-2'
+          className='p-4 w-full border-primary text-primary hover:bg-primary/10 cursor-pointer'
           onClick={() => setShowPicker(true)}
         >
           + Add exercise
         </Button>
+      </div>
 
+      <div className='px-6 py-4 border-t border-border shrink-0 mb-2'>
         <Button
-          className='p-6 w-full bg-primary text-primary-foreground text-[0.9375rem] font-medium hover:opacity-90 mb-2 cursor-pointer'
+          className='p-6 w-full bg-primary text-primary-foreground hover:opacity-90 mb-2 cursor-pointer mt-2'
           onClick={handleSave}
         >
           Save workout
         </Button>
-
         <Button
           variant='outline'
-          className='p-6 w-full border-border text-muted-foreground text-[0.9375rem] font-medium cursor-pointer'
+          className='p-6 w-full border-border text-muted-foreground cursor-pointer'
           onClick={onCancel}
         >
           Cancel
         </Button>
-
-        <ExercisePicker
-          isOpen={showPicker}
-          onClose={() => setShowPicker(false)}
-          onSelect={addExercise}
-        />
       </div>
+
+      <ExercisePicker
+        isOpen={showPicker}
+        onClose={() => setShowPicker(false)}
+        onSelect={addExercise}
+      />
     </div>
   )
 }
