@@ -8,6 +8,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog'
+import { X } from 'lucide-react'
 
 export default function WorkoutDetail({ workout, onClose, onDelete }) {
   const lastWorkout = useRef(null)
@@ -61,16 +62,16 @@ export default function WorkoutDetail({ workout, onClose, onDelete }) {
         className={`fixed top-0 left-1/2 w-full max-w-[430px] h-screen bg-card z-50 overflow-y-auto transition-transform duration-300
           ${workout ? '-translate-x-1/2' : 'translate-x-[calc(-50%+100%)]'}`}
       >
-        <div className='flex items-center gap-3 px-6 py-5 border-b border-border sticky top-0 bg-card'>
-          <Button
-            className='text-primary text-xl bg-transparent border-none cursor-pointer'
-            onClick={onClose}
-          >
-            &rarr;
-          </Button>
+        <div className='flex items-center justify-between px-6 py-5 border-b border-border shrink-0'>
           <h1 className='text-[1.375rem] font-medium text-foreground'>
             {displayed ? displayed.name : ''}
           </h1>
+          <Button
+            className='text-muted-foreground hover:text-foreground cursor-pointer bg-transparent border-none'
+            onClick={onClose}
+          >
+            <X size={20} />
+          </Button>
         </div>
 
         <div className='px-6 py-5 select-none'>

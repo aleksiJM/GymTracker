@@ -163,9 +163,11 @@ export default function Log() {
 
   return (
     <>
-      <div className='px-6 pt-6 pb-4'>
-        <h1 className='text-[1.375rem] font-medium text-foreground'>Log</h1>
-        <p className='text-sm text-muted-foreground mb-5'>
+      <div className='px-6 pt-6 mt-5'>
+        <h1 className='text-[1.375rem] font-medium text-foreground uppercase tracking-wide mb-1'>
+          Log
+        </h1>
+        <p className='text-sm text-muted-foreground mb-8'>
           Start a new workout and track bodyweight
         </p>
 

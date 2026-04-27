@@ -8,3 +8,8 @@ createRoot(document.getElementById('root')).render(
     <App />
   </StrictMode>
 )
+
+const savedTheme = localStorage.getItem('theme') || 'dark'
+if (savedTheme === 'dark') {
+  document.documentElement.classList.add('dark')
+}
