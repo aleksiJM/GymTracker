@@ -11,6 +11,10 @@ export default function Settings({ isOpen, onClose }) {
     return localStorage.getItem('units') || 'kg'
   })
 
+  const [mode, setMode] = useState(() => {
+    return localStorage.getItem('mode') || 'gain'
+  })
+
   useEffect(() => {
     const root = document.documentElement
     if (theme === 'dark') {
@@ -96,6 +100,36 @@ export default function Settings({ isOpen, onClose }) {
                 onClick={() => setUnits('lbs')}
               >
                 lbs
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <p className='text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3'>
+          Modes
+        </p>
+
+        <div className='border border-border rounded-xl overflow-hidden mb-6'>
+          <div className='flex justify-between items-center px-4 py-3'>
+            <span className='text-[0.9375rem] text-foreground'>
+              Bodybuilding phase
+            </span>
+            <div className='flex gap-2'>
+              <Button
+                size='sm'
+                variant={mode === 'gain' ? 'default' : 'outline'}
+                className={`cursor-pointer ${mode === 'gain' ? 'bg-primary text-primary-foreground' : 'border-border text-muted-foreground'}`}
+                onClick={() => setMode('gain')}
+              >
+                Gain
+              </Button>
+              <Button
+                size='sm'
+                variant={mode === 'cut' ? 'default' : 'outline'}
+                className={`cursor-pointer ${mode === 'cut' ? 'bg-primary text-primary-foreground' : 'border-border text-muted-foreground'}`}
+                onClick={() => setMode('cut')}
+              >
+                Cut
               </Button>
             </div>
           </div>

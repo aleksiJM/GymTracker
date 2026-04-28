@@ -192,7 +192,8 @@ export default function ExercisePicker({ isOpen, onClose, onSelect }) {
       const { data, error } = await supabase
         .from('exercise_library')
         .select('*, exercise_library_muscles(*)')
-        .order('name', { ascending: true })
+        .order('created_at', { ascending: false })
+        .limit(3)
 
       if (error) console.error(error)
       else setExercises(data)

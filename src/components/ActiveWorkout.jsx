@@ -1,10 +1,14 @@
-import { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import ExercisePicker from './ExercisePicker'
 import { X } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 function ExerciseBlock({ exercise, onChange, onRemove }) {
+  const [isOpen, setIsOpen] = useState(true)
+
   const addSet = () => {
     const lastSet = exercise.sets[exercise.sets.length - 1]
     onChange({
@@ -49,11 +53,21 @@ function ExerciseBlock({ exercise, onChange, onRemove }) {
   }
 
   return (
-    <div className='bg-secondary border border-border rounded-x1 p-4 mb-3'>
-      <div className='flex justify-between items-center mb-3'>
-        <span className='text-[0.9375rem] font-medium text-foreground'>
-          {exercise.name}
-        </span>
+    <div className='bg-secondary border border-border rounded-x1 p-4 mb-3 transition-all'>
+      <div className='flex justify-between items-center'>
+        <div className='flex justify-between items-center'>
+          <div
+            className='flex items-center gap-2 cursor-pointer flex-grow'
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            <ChevronRight
+              className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-90' : 'rotate-0'}`}
+            />
+            <span className='text-[0.9375rem] font-medium text-foreground'>
+              {exercise.name}
+            </span>
+          </div>
+        </div>
         <Button
           variant='outline'
           size='sm'
@@ -63,55 +77,71 @@ function ExerciseBlock({ exercise, onChange, onRemove }) {
           Remove
         </Button>
       </div>
-
-      <div className='grid grid-cols-[1fr_1fr_1.5rem] gap-2 mb-1'>
-        <div className='text-xs text-muted-foreground text-center'>Reps</div>
-        <div className='text-xs text-muted-foreground text-center'>
-          Weight (kg)
-        </div>
-        <div />
-      </div>
-
-      {exercise.sets.map((set, index) => (
-        <div
-          key={index}
-          className='grid grid-cols-[1fr_1fr_1.5rem] gap-2 mb-2 items-center'
-        >
-          <Input
-            type='number'
-            min='1'
-            value={set.reps}
-            placeholder='0'
-            onKeyDown={blockInvalidKeysNoDecimal}
-            className='bg-card border-border text-foreground text-center'
-            onChange={(e) => updateSet(index, 'reps', e.target.value)}
-          />
-          <Input
-            type='number'
-            min='1'
-            value={set.weight}
-            placeholder='0'
-            onKeyDown={blockInvalidKeys}
-            className='bg-card border-border text-foreground text-center'
-            onChange={(e) => updateSet(index, 'weight', e.target.value)}
-          />
-          <Button
-            className='text-muted-foreground hover:text-destructive transition-colors cursor-pointer bg-transparent border-none text-lg leading-none pb-1'
-            onClick={() => removeSet(index)}
-            disabled={exercise.sets.length === 1}
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            key='content'
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2, ease: 'easeInOut' }}
+            className='overflow-hidden'
           >
-            &times;
-          </Button>
-        </div>
-      ))}
+            <div className='pt-4'>
+              <div className='grid grid-cols-[1fr_1fr_1.5rem] gap-2 mb-1'>
+                <div className='text-xs text-muted-foreground text-center'>
+                  Reps
+                </div>
+                <div className='text-xs text-muted-foreground text-center'>
+                  Weight (kg)
+                </div>
+                <div />
+              </div>
 
-      <Button
-        variant='outline'
-        className='w-full border-border text-muted-foreground hover:text-foreground mt-1'
-        onClick={addSet}
-      >
-        + Add set
-      </Button>
+              {exercise.sets.map((set, index) => (
+                <div
+                  key={index}
+                  className='grid grid-cols-[1fr_1fr_1.5rem] gap-2 mb-2 items-center'
+                >
+                  <Input
+                    type='number'
+                    min='1'
+                    value={set.reps}
+                    placeholder='0'
+                    onKeyDown={blockInvalidKeysNoDecimal}
+                    className='bg-card border-border text-foreground text-center'
+                    onChange={(e) => updateSet(index, 'reps', e.target.value)}
+                  />
+                  <Input
+                    type='number'
+                    min='1'
+                    value={set.weight}
+                    placeholder='0'
+                    onKeyDown={blockInvalidKeys}
+                    className='bg-card border-border text-foreground text-center'
+                    onChange={(e) => updateSet(index, 'weight', e.target.value)}
+                  />
+                  <Button
+                    className='text-muted-foreground hover:text-destructive transition-colors cursor-pointer bg-transparent border-none text-lg leading-none pb-1'
+                    onClick={() => removeSet(index)}
+                    disabled={exercise.sets.length === 1}
+                  >
+                    &times;
+                  </Button>
+                </div>
+              ))}
+
+              <Button
+                variant='outline'
+                className='w-full border-border text-muted-foreground hover:text-foreground mt-1'
+                onClick={addSet}
+              >
+                + Add set
+              </Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
