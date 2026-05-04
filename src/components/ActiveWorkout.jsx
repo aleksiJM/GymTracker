@@ -5,6 +5,7 @@ import ExercisePicker from './ExercisePicker'
 import { X } from 'lucide-react'
 import { ChevronRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import Header from './Header'
 
 function ExerciseBlock({ exercise, onChange, onRemove }) {
   const [isOpen, setIsOpen] = useState(true)
@@ -203,17 +204,7 @@ export default function ActiveWorkout({
       className={`fixed top-0 left-1/2 w-full max-w-[430px] h-screen bg-card z-50 flex flex-col transition-transform duration-300
         ${isOpen ? '-translate-x-1/2' : 'translate-x-[calc(-50%+100%)]'}`}
     >
-      <div className='flex items-center justify-between px-6 py-5 border-b border-border shrink-0'>
-        <h1 className='text-[1.375rem] font-medium text-foreground'>
-          {lastWorkoutName.current}
-        </h1>
-        <Button
-          className='text-muted-foreground hover:text-foreground cursor-pointer bg-transparent border-none'
-          onClick={onCancel}
-        >
-          <X size={20} />
-        </Button>
-      </div>
+      <Header title={lastWorkoutName.current} onClose={onCancel} />
 
       <div className='flex-1 overflow-y-auto px-6 py-4'>
         {exercises.map((exercise, index) => (
@@ -238,7 +229,7 @@ export default function ActiveWorkout({
         </Button>
       </div>
 
-      <div className='px-6 py-4 border-t border-border shrink-0 mb-2'>
+      <div className='px-6 py-4 border-t-3 border-border shrink-0 mb-2'>
         <Button
           className='p-6 w-full bg-primary text-primary-foreground hover:opacity-90 mb-5 cursor-pointer mt-2'
           onClick={handleSave}

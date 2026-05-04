@@ -1,4 +1,5 @@
 import { Badge } from '@/components/ui/badge'
+import { MUSCLE_TAG_COLORS } from '@/constants/constants'
 
 export default function WorkoutCard({ workout, onClick }) {
   const totalSets = workout.exercises.reduce(
@@ -13,16 +14,6 @@ export default function WorkoutCard({ workout, onClick }) {
         .filter(Boolean)
     ),
   ]
-
-  const tagColor = (muscle) => {
-    if (['Chest', 'Deltoids', 'Triceps'].includes(muscle))
-      return 'bg-emerald-950 text-emerald-400 hover:bg-emerald-950'
-    if (['Back', 'Biceps'].includes(muscle))
-      return 'bg-blue-950 text-blue-400 hover:bg-blue-950'
-    if (['Quads', 'Hamstrings', 'Glutes', 'Calves'].includes(muscle))
-      return 'bg-red-950 text-red-400 hover:bg-red-950'
-    return 'bg-yellow-950 text-yellow-400 hover:bg-yellow-950'
-  }
 
   return (
     <article
@@ -40,7 +31,7 @@ export default function WorkoutCard({ workout, onClick }) {
           {muscleGroups.map((muscle) => (
             <Badge
               key={muscle}
-              className={`text-[0.6875rem] font-medium px-2 py-0.5 rounded-full border-none ${tagColor(muscle)}`}
+              className={`text-[0.6875rem] font-medium px-2 py-0.5 rounded-full border-none ${MUSCLE_TAG_COLORS(muscle)}`}
             >
               {muscle}
             </Badge>

@@ -16,29 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-
-const MUSCLE_GROUPS = {
-  Chest: ['Upper', 'Middle', 'Lower'],
-  Deltoids: ['Front', 'Side', 'Rear'],
-  Back: ['Traps', 'Rhomboids', 'Teres major', 'Lats'],
-  Biceps: [],
-  Triceps: ['Long', 'Lateral and medial'],
-  Quads: [],
-  Hamstrings: [],
-  Glutes: [],
-  Calves: [],
-  Core: [],
-}
-
-const tagColor = (muscle) => {
-  if (['Chest', 'Deltoids', 'Triceps'].includes(muscle))
-    return 'bg-emerald-950 text-emerald-400 hover:bg-emerald-950'
-  if (['Back', 'Biceps'].includes(muscle))
-    return 'bg-blue-950 text-blue-400 hover:bg-blue-950'
-  if (['Quads', 'Hamstrings', 'Glutes', 'Calves'].includes(muscle))
-    return 'bg-red-950 text-red-400 hover:bg-red-950'
-  return 'bg-yellow-950 text-yellow-400 hover:bg-yellow-950'
-}
+import { MUSCLE_GROUPS, MUSCLE_TAG_COLORS } from '@/constants/constants'
 
 function CreateExerciseForm({ name, onCreated }) {
   const [muscles, setMuscles] = useState([])
@@ -114,11 +92,11 @@ function CreateExerciseForm({ name, onCreated }) {
           {muscles.map((m, i) => (
             <Badge
               key={i}
-              className={`text-xs border-none cursor-pointer ${tagColor(m.muscle_group)}`}
+              className={`text-xs border-none cursor-pointer ${MUSCLE_TAG_COLORS(m.muscle_group)}`}
               onClick={() => removeMuscle(m)}
             >
               {m.muscle_group}
-              {m.region ? `· ${m.region}` : ''} &times;
+              {m.region ? ` · ${m.region}` : ''} &times;
             </Badge>
           ))}
         </div>
@@ -268,7 +246,7 @@ export default function ExercisePicker({ isOpen, onClose, onSelect }) {
             filtered.map((exercise) => (
               <div
                 key={exercise.id}
-                className='flex justify-between items-center py-3 border-b border-border cursor-pointer hover:bg-secondary px-2 rounded-lg transition-colors'
+                className='flex justify-between items-center py-3 border-b-2 border-border cursor-pointer hover:bg-secondary px-2 rounded-lg transition-colors'
                 onClick={() => handleSelect(exercise)}
               >
                 <div className='flex-1 min-w-0 pr-2'>
@@ -280,7 +258,7 @@ export default function ExercisePicker({ isOpen, onClose, onSelect }) {
                       {exercise.exercise_library_muscles.map((m, i) => (
                         <Badge
                           key={i}
-                          className={`text-[0.6875rem] border-none ${tagColor(m.muscle_group)}`}
+                          className={`text-[0.6875rem] border-none ${MUSCLE_TAG_COLORS(m.muscle_group)}`}
                         >
                           {m.muscle_group}
                           {m.region ? ` · ${m.region}` : ''}
