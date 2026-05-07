@@ -24,7 +24,7 @@ export default function WorkoutCard({ workout, onClick }) {
         <h3 className='text-[0.9375rem] font-medium text-foreground'>
           {workout.name}
         </h3>
-        <span className='text-xs text-primary'>{workout.date}</span>
+        <h3 className='text-xs text-primary py-1'>{workout.date}</h3>
       </div>
       {muscleGroups.length > 0 && (
         <div className='flex flex-wrap gap-1.5 mt-1'>

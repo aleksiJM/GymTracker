@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { ChevronRight } from 'lucide-react'
 
 export default function Log() {
   const [activeWorkout, setActiveWorkout] = useState(null)
@@ -163,7 +164,7 @@ export default function Log() {
 
   return (
     <>
-      <div className='px-6 pt-6 mt-5'>
+      <div className='px-6 pt-11'>
         <h1 className='text-[1.375rem] font-medium text-foreground uppercase tracking-wide mb-1'>
           Log
         </h1>
@@ -221,7 +222,9 @@ export default function Log() {
                 <h3 className='text-[0.9375rem] font-medium text-foreground'>
                   {workout.name}
                 </h3>
-                <span className='text-xs text-primary'>Repeat &rarr;</span>
+                <span className='flex text-xs text-primary -mr-1'>
+                  Repeat <ChevronRight size={18} />
+                </span>
               </div>
               <p className='text-xs text-muted-foreground mt-1'>
                 {workout.exercises.length} exercises

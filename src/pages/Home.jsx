@@ -100,13 +100,13 @@ export default function Home() {
 
   return (
     <>
-      <div className='px-6 pt-6 mt-5 mb-8'>
+      <div className='px-6 pt-11 mb-8'>
         <div className='flex justify-between items-center mb-1'>
           <h1 className='text-[1.375rem] font-medium text-foreground uppercase tracking-wide'>
             Home
           </h1>
           <Button
-            className='text-muted-foreground hover:text-foreground cursor-pointer'
+            className='text-muted-foreground hover:text-foreground cursor-pointer mt-1'
             onClick={() => setShowSettigs(true)}
           >
             <SettingsIcon size={25} />
@@ -149,7 +149,6 @@ export default function Home() {
                   >
                     {bodyweightChange[bodyweightView] > 0 ? '+ ' : '- '}
                     {Math.abs(bodyweightChange[bodyweightView]).toFixed(1)} kg
-                    <keygen />
                   </div>
                   <div className='text-xs text-muted-foreground mt-1'>
                     Bodyweight ·{' '}
