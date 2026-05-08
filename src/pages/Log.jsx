@@ -77,9 +77,13 @@ export default function Log() {
   }
 
   const saveWorkout = async (workout) => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
     const { data: workoutData, error: workoutError } = await supabase
       .from('workouts')
-      .insert({ name: workout.name })
+      .insert({ name: workout.name, user_id: user.id })
       .select()
       .single()
 
@@ -147,9 +151,13 @@ export default function Log() {
     if (!bodyweight) return
     setSaving(true)
 
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
     const { error } = await supabase
       .from('bodyweight')
-      .insert({ weight: parseFloat(bodyweight) })
+      .insert({ weight: parseFloat(bodyweight), user_id: user.id })
 
     if (error) {
       console.error(error)

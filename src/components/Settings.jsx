@@ -1,9 +1,16 @@
 import { useEffect, useState } from 'react'
-import { X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Header from './Header'
+import { useAuth } from '@/lib/AuthContext'
+import { supabase } from '@/lib/supabase'
 
 export default function Settings({ isOpen, onClose }) {
+  const { user } = useAuth()
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut()
+  }
+
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('theme') || 'dark'
   })
@@ -123,6 +130,28 @@ export default function Settings({ isOpen, onClose }) {
                 Cut
               </Button>
             </div>
+          </div>
+        </div>
+
+        <p className='text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3'>
+          Account
+        </p>
+
+        <div className='border border-border rounded-xl overflow-hidden mb-6'>
+          <div className='flex justify-between items-center px-4 py-3 border-b border-border'>
+            <span className='text-[0.9375rem] text-foreground'>
+              Signed in as
+            </span>
+            <span className='text-sm text-muted-foreground'>{user?.email}</span>
+          </div>
+          <div className='px-4 py-3'>
+            <Button
+              variant='outline'
+              className='w-full border-destructive text-destructive hover:bg-destructive/10 cursor-pointer'
+              onClick={handleSignOut}
+            >
+              Sign out
+            </Button>
           </div>
         </div>
       </div>

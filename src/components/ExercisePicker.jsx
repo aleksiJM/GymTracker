@@ -57,9 +57,13 @@ function CreateExerciseForm({ name, onCreated }) {
     if (!name.trim()) return
     setSaving(true)
 
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
     const { data: exercise, error } = await supabase
       .from('exercise_library')
-      .insert({ name: name.trim() })
+      .insert({ name: name.trim(), user_id: user.id })
       .select()
       .single()
 
