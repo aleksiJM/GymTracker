@@ -2,7 +2,7 @@ import { ChevronLeft } from 'lucide-react'
 
 export default function Header({ title, onClose }) {
   return (
-    <div className='relative flex items-center px-3 py-3 border-b-1 border-border shrink-0 pt-11'>
+    <div className='relative flex items-center px-3 py-3 border-b-1 border-border shrink-0 pt-6'>
       <button
         className='text-muted-foreground hover:text-foreground cursor-pointer bg-transparent border-none'
         onClick={onClose}

@@ -229,9 +229,9 @@ export default function ActiveWorkout({
         </Button>
       </div>
 
-      <div className='fixed bottom-0 left-1/2 -translate-x-1/2 w-full px-6 py-3 border-t-3 border-border shrink-0'>
+      <div className='px-6 py-4 border-t border-border shrink-0'>
         <Button
-          className='p-6 w-full bg-primary text-primary-foreground hover:opacity-90 mb-5 cursor-pointer mt-2'
+          className='w-full bg-primary text-primary-foreground hover:opacity-90 cursor-pointer'
           onClick={handleSave}
         >
           Save workout
