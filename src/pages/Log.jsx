@@ -172,7 +172,7 @@ export default function Log() {
 
   return (
     <>
-      <div className='px-6 pt-11'>
+      <div className='px-6 pt-6'>
         <h1 className='text-[1.375rem] font-medium text-foreground uppercase tracking-wide mb-1'>
           Log
         </h1>

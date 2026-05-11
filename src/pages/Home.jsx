@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 import WorkoutCard from '../components/WorkoutCard'
 import WorkoutDetail from '../components/WorkoutDetail'
 import { Card, CardContent } from '@/components/ui/card'
-import { Settings as SettingsIcon } from 'lucide-react'
+import { Menu } from 'lucide-react'
 import Settings from '@/components/Settings'
 import { Button } from '@base-ui/react'
 
@@ -100,7 +100,7 @@ export default function Home() {
 
   return (
     <>
-      <div className='px-6 pt-11 mb-8'>
+      <div className='px-6 pt-6 mb-8'>
         <div className='flex justify-between items-center mb-1'>
           <h1 className='text-[1.375rem] font-medium text-foreground uppercase tracking-wide'>
             Home
@@ -109,7 +109,7 @@ export default function Home() {
             className='text-muted-foreground hover:text-foreground cursor-pointer mt-1'
             onClick={() => setShowSettigs(true)}
           >
-            <SettingsIcon size={25} />
+            <Menu size={25}></Menu>
           </Button>
         </div>
         <p className='text-sm text-muted-foreground'>Week 18 · April 2026</p>

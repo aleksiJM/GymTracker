@@ -39,6 +39,7 @@ function ChartCard({
   color = '#16a34a',
   gridColor,
   axisColor,
+  yDomainMin = 'auto',
 }) {
   if (!data || data.length === 0) {
     return (
@@ -72,6 +73,9 @@ function ChartCard({
             tick={{ fontSize: 10, fill: `${axisColor}` }}
             tickLine={false}
             axisLine={false}
+            domain={[yDomainMin, 'auto']}
+            tickCount={12}
+            scale='linear'
           />
           <Tooltip content={<CustomTooltip unit={unit} />} />
           <Line
@@ -134,37 +138,75 @@ export default function Progress() {
         .from('workouts')
         .select(
           `
-          date, exercises ( sets ( weight, reps ) )`
+          date, created_at, exercises ( name, sets ( weight, reps ) )`
         )
         .order('date', { ascending: true })
 
       if (workoutData && workoutData.length > 1) {
+        // Build a map of (exercise name) -> (first ever volume)
+        const firstVolumeMap = {}
+
+        workoutData.forEach((workout) => {
+          if (!workout.exercises) return
+          workout.exercises.forEach((ex) => {
+            if (!ex.sets) return
+            const volume = ex.sets.reduce(
+              (sum, set) => sum + (set.weight || 0) * (set.reps || 0),
+              0
+            )
+            if (volume > 0 && !firstVolumeMap[ex.name]) {
+              firstVolumeMap[ex.name] = volume
+            }
+          })
+        })
+
+        console.log('firstVolumeMap:', firstVolumeMap)
+        console.log('workoutData:', workoutData)
+
         const overload = workoutData
-          .map((workout, i) => {
-            if (i === 0) return null
-            const prevWorkout = workoutData[i - 1]
+          .map((workout) => {
+            if (!workout.exercises || workout.exercises.length === 0)
+              return null
 
-            const totalVolume = (w) =>
-              w.exercises.reduce(
-                (sum, ex) =>
-                  sum +
-                  ex.sets.reduce(
-                    (s, set) => s + (set.weight || 0) * (set.reps || 0),
-                    0
-                  ),
-                0
-              )
+            const rawDate = workout.date || workout.created_at
+            if (!rawDate) return null
 
-            const curr = totalVolume(workout)
-            const prev = totalVolume(prevWorkout)
-            if (prev === 0) return null
+            const parsedDate = new Date(rawDate)
+            if (isNaN(parsedDate.getTime())) return null
 
-            const change = parseFloat((((curr - prev) / prev) * 100).toFixed(1))
-            const date = new Date(workout.date).toLocaleDateString('en-GB', {
+            const date = parsedDate.toLocaleDateString('en-GB', {
               day: 'numeric',
               month: 'short',
             })
-            return { date, overload: change }
+
+            const exerciseOverloads = workout.exercises
+              .map((ex) => {
+                if (!ex.sets) return null
+                const firstVolume = firstVolumeMap[ex.name]
+                if (!firstVolume) return null
+
+                const currentVolume = ex.sets.reduce(
+                  (sum, set) => sum + (set.weight || 0) * (set.reps || 0),
+                  0
+                )
+                if (currentVolume === 0) return null
+
+                if (currentVolume === firstVolume) return 0
+
+                return ((currentVolume - firstVolume) / firstVolume) * 100
+              })
+              .filter((v) => v !== null)
+
+            if (exerciseOverloads.length === 0) return null
+
+            const avgOverload = parseFloat(
+              (
+                exerciseOverloads.reduce((a, b) => a + b, 0) /
+                exerciseOverloads.length
+              ).toFixed(1)
+            )
+
+            return { date, overload: avgOverload }
           })
           .filter(Boolean)
 
@@ -200,7 +242,7 @@ export default function Progress() {
     if (!selectedExercise) return
 
     const fetchExerciseProgress = async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('exercises')
         .select(
           `
@@ -208,26 +250,20 @@ export default function Progress() {
           sets ( weight, reps )
         `
         )
-        .eq(
-          'name',
-          exercises.find((e) => e.id === selectedExercise)?.name ?? ''
-        )
-        .order('workout(date)', { ascending: true })
+        .eq('name', selectedExercise)
 
       if (data) {
         const points = data
-          .map((entry) => {
-            const bestWeight = Math.max(...entry.sets.map((s) => s.weight || 0))
-            const date = new Date(entry.workout.date).toLocaleDateString(
-              'en-GB',
-              {
-                day: 'numeric',
-                month: 'short',
-              }
-            )
-            return { date, weight: bestWeight }
-          })
+          .filter((entry) => entry.workout?.date)
+          .map((entry) => ({
+            date: new Date(entry.workout.date).toLocaleDateString('en-GB', {
+              day: 'numeric',
+              month: 'short',
+            }),
+            weight: Math.max(...entry.sets.map((s) => s.weight || 0)),
+          }))
           .filter((p) => p.weight > 0)
+          .sort((a, b) => new Date(a.date) - new Date(b.date))
 
         setExerciseData(points)
       }
@@ -239,7 +275,7 @@ export default function Progress() {
   if (loading) return
 
   return (
-    <div className='px-6 pt-11 mb-8'>
+    <div className='px-6 pt-6 mb-8'>
       <h1 className='text-[1.375rem] font-medium text-foreground uppercase tracking-wide mb-1'>
         Progress
       </h1>
@@ -253,6 +289,8 @@ export default function Progress() {
         dataKey='overload'
         unit='%'
         color='#3b82f6'
+        gridColor={gridColor}
+        axisColor={axisColor}
       />
 
       <ChartCard
@@ -280,8 +318,8 @@ export default function Progress() {
             <SelectContent className='bg-card border-border'>
               {exercises.map((ex) => (
                 <SelectItem
-                  key={ex.id}
-                  value={ex.id}
+                  key={ex.name}
+                  value={ex.name}
                   className='text-foreground'
                 >
                   {ex.name}
@@ -299,6 +337,11 @@ export default function Progress() {
               dataKey='weight'
               unit='kg'
               color='#f59e0b'
+              gridColor={gridColor}
+              axisColor={axisColor}
+              yDomainMin={
+                exerciseData.length > 0 ? exerciseData[0].weight : 'auto'
+              }
             />
           )}
         </>
