@@ -1,5 +1,11 @@
-import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import {
+  fetchBodyweight,
+  fetchWorkoutsForProgress,
+  fetchExercisesForProgress,
+  fetchExerciseProgress,
+} from '@/lib/queries'
 import {
   LineChart,
   Line,
@@ -92,13 +98,117 @@ function ChartCard({
   )
 }
 
+function processBodyweightData(data) {
+  if (!data) return []
+  const grouped = {}
+  data.forEach((entry) => {
+    const date = new Date(entry.created_at).toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+    })
+    if (!grouped[date]) grouped[date] = []
+    grouped[date].push(entry.weight)
+  })
+  return Object.entries(grouped).map(([date, weights]) => ({
+    date,
+    weight: parseFloat(
+      (weights.reduce((a, b) => a + b, 0) / weights.length).toFixed(1)
+    ),
+  }))
+}
+
+function processOverloadData(workoutData) {
+  if (!workoutData || workoutData.length < 2) return []
+
+  const firstVolumeMap = {}
+  workoutData.forEach((workout) => {
+    if (!workout.exercises) return
+    workout.exercises.forEach((ex) => {
+      if (!ex.sets) return
+      const volume = ex.sets.reduce(
+        (sum, set) => sum + (set.weight || 0) * (set.reps || 0),
+        0
+      )
+      if (volume > 0 && !firstVolumeMap[ex.name]) {
+        firstVolumeMap[ex.name] = volume
+      }
+    })
+  })
+
+  return workoutData
+    .map((workout) => {
+      if (!workout.exercises || workout.exercises.lenght === 0) return null
+      const rawDate = workout.date || workout.created_at
+      if (!rawDate) return null
+      const parsedDate = new Date(rawDate)
+      if (isNaN(parsedDate.getTime())) return null
+
+      const date = parsedDate.toLocaleDateString('en-GB', {
+        day: 'numeric',
+        month: 'short',
+      })
+
+      const exerciseOverloads = workout.exercises
+        .map((ex) => {
+          if (!ex.sets) return null
+          const firstVolume = firstVolumeMap[ex.name]
+          if (!firstVolume) return null
+          const currentVolume = ex.sets.reduce(
+            (sum, set) => sum + (set.weight || 0) * (set.reps || 0),
+            0
+          )
+          if (currentVolume === 0) return null
+          if (currentVolume === firstVolume) return 0
+          return ((currentVolume - firstVolume) / firstVolume) * 100
+        })
+        .filter((v) => v !== null)
+
+      if (exerciseOverloads.length === 0) return null
+
+      return {
+        date,
+        overload: parseFloat(
+          (
+            exerciseOverloads.reduce((a, b) => a + b, 0) /
+            exerciseOverloads.length
+          ).toFixed(1)
+        ),
+      }
+    })
+    .filter(Boolean)
+}
+
+function processQualifiedExercises(data) {
+  if (!data) return []
+  const exerciseMap = {}
+  data.forEach((ex) => {
+    if (!ex.workout?.date) return
+    if (!exerciseMap[ex.name]) exerciseMap[ex.name] = new Set()
+    exerciseMap[ex.name].add(ex.workout.date)
+  })
+  return Object.entries(exerciseMap)
+    .filter(([_, dates]) => dates.size >= 2)
+    .map(([name]) => ({ name }))
+    .sort((a, b) => a.name.localeCompare(b.name))
+}
+
+function processExerciseData(data) {
+  if (!data) return []
+  return data
+    .filter((entry) => entry.workout?.date)
+    .map((entry) => ({
+      date: new Date(entry.workout.date).toLocaleDateString('en-GB', {
+        day: 'numeric',
+        month: 'short',
+      }),
+      weight: Math.max(...entry.sets.map((s) => s.weight || 0)),
+    }))
+    .filter((p) => p.weight > 0)
+    .sort((a, b) => new Date(a.date) - new Date(b.date))
+}
+
 export default function Progress() {
-  const [bodyweightData, setBodyweightData] = useState([])
-  const [overloadData, setOverloadData] = useState([])
-  const [exercises, setExercises] = useState([])
   const [selectedExercise, setSelectedExercise] = useState('')
-  const [exerciseData, setExerciseData] = useState([])
-  const [loading, setLoading] = useState(true)
 
   const gridColor = getComputedStyle(document.documentElement)
     .getPropertyValue('--border')
@@ -107,172 +217,31 @@ export default function Progress() {
     .getPropertyValue('--muted-foreground')
     .trim()
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const { data: bwData } = await supabase
-        .from('bodyweight')
-        .select('weight, created_at')
-        .order('created_at', { ascending: true })
+  const { data: rawBodyweight = [], isLoading: bwLoading } = useQuery({
+    queryKey: ['bodyweight'],
+    queryFn: fetchBodyweight,
+  })
 
-      if (bwData) {
-        const grouped = {}
-        bwData.forEach((entry) => {
-          const date = new Date(entry.created_at).toLocaleDateString('en-GB', {
-            day: 'numeric',
-            month: 'short',
-          })
-          if (!grouped[date]) grouped[date] = []
-          grouped[date].push(entry.weight)
-        })
-        setBodyweightData(
-          Object.entries(grouped).map(([date, weights]) => ({
-            date,
-            weight: parseFloat(
-              (weights.reduce((a, b) => a + b, 0) / weights.length).toFixed(1)
-            ),
-          }))
-        )
-      }
+  const { data: workoutData = [], isLoading: workoutLoading } = useQuery({
+    queryKey: ['workoutsForProgress'],
+    queryFn: fetchWorkoutsForProgress,
+  })
 
-      const { data: workoutData } = await supabase
-        .from('workouts')
-        .select(
-          `
-          date, created_at, exercises ( name, sets ( weight, reps ) )`
-        )
-        .order('date', { ascending: true })
+  const { data: exercisesRaw = [], isLoading: exLoading } = useQuery({
+    queryKey: ['exercisesForProgress'],
+    queryFn: fetchExercisesForProgress,
+  })
 
-      if (workoutData && workoutData.length > 1) {
-        // Build a map of (exercise name) -> (first ever volume)
-        const firstVolumeMap = {}
+  const { data: exerciseProgressRaw = [] } = useQuery({
+    queryKey: ['exerciseProgress', selectedExercise],
+    queryFn: () => fetchExerciseProgress(selectedExercise),
+    enabled: !!selectedExercise,
+  })
 
-        workoutData.forEach((workout) => {
-          if (!workout.exercises) return
-          workout.exercises.forEach((ex) => {
-            if (!ex.sets) return
-            const volume = ex.sets.reduce(
-              (sum, set) => sum + (set.weight || 0) * (set.reps || 0),
-              0
-            )
-            if (volume > 0 && !firstVolumeMap[ex.name]) {
-              firstVolumeMap[ex.name] = volume
-            }
-          })
-        })
-
-        console.log('firstVolumeMap:', firstVolumeMap)
-        console.log('workoutData:', workoutData)
-
-        const overload = workoutData
-          .map((workout) => {
-            if (!workout.exercises || workout.exercises.length === 0)
-              return null
-
-            const rawDate = workout.date || workout.created_at
-            if (!rawDate) return null
-
-            const parsedDate = new Date(rawDate)
-            if (isNaN(parsedDate.getTime())) return null
-
-            const date = parsedDate.toLocaleDateString('en-GB', {
-              day: 'numeric',
-              month: 'short',
-            })
-
-            const exerciseOverloads = workout.exercises
-              .map((ex) => {
-                if (!ex.sets) return null
-                const firstVolume = firstVolumeMap[ex.name]
-                if (!firstVolume) return null
-
-                const currentVolume = ex.sets.reduce(
-                  (sum, set) => sum + (set.weight || 0) * (set.reps || 0),
-                  0
-                )
-                if (currentVolume === 0) return null
-
-                if (currentVolume === firstVolume) return 0
-
-                return ((currentVolume - firstVolume) / firstVolume) * 100
-              })
-              .filter((v) => v !== null)
-
-            if (exerciseOverloads.length === 0) return null
-
-            const avgOverload = parseFloat(
-              (
-                exerciseOverloads.reduce((a, b) => a + b, 0) /
-                exerciseOverloads.length
-              ).toFixed(1)
-            )
-
-            return { date, overload: avgOverload }
-          })
-          .filter(Boolean)
-
-        setOverloadData(overload)
-      }
-
-      const { data: exData } = await supabase
-        .from('exercises')
-        .select(`name, workout:workouts ( date )`)
-
-      if (exData) {
-        const exerciseMap = {}
-        exData.forEach((ex) => {
-          if (!ex.workout?.date) return
-          if (!exerciseMap[ex.name]) exerciseMap[ex.name] = new Set()
-          exerciseMap[ex.name].add(ex.workout.date)
-        })
-
-        const qualifiedExercises = Object.entries(exerciseMap)
-          .filter(([_, dates]) => dates.size >= 2)
-          .map(([name]) => ({ name }))
-          .sort((a, b) => a.name.localeCompare(b.name))
-
-        setExercises(qualifiedExercises)
-      }
-      setLoading(false)
-    }
-
-    fetchData()
-  }, [])
-
-  useEffect(() => {
-    if (!selectedExercise) return
-
-    const fetchExerciseProgress = async () => {
-      const { data, error } = await supabase
-        .from('exercises')
-        .select(
-          `
-          workout:workouts ( date ),
-          sets ( weight, reps )
-        `
-        )
-        .eq('name', selectedExercise)
-
-      if (data) {
-        const points = data
-          .filter((entry) => entry.workout?.date)
-          .map((entry) => ({
-            date: new Date(entry.workout.date).toLocaleDateString('en-GB', {
-              day: 'numeric',
-              month: 'short',
-            }),
-            weight: Math.max(...entry.sets.map((s) => s.weight || 0)),
-          }))
-          .filter((p) => p.weight > 0)
-          .sort((a, b) => new Date(a.date) - new Date(b.date))
-
-        setExerciseData(points)
-      }
-    }
-
-    fetchExerciseProgress()
-  }, [selectedExercise])
-
-  if (loading) return
+  const bodyweightData = processBodyweightData(rawBodyweight)
+  const overloadData = processOverloadData(workoutData)
+  const exercises = processQualifiedExercises(exercisesRaw)
+  const exerciseData = processExerciseData(exerciseProgressRaw)
 
   return (
     <div className='px-6 pt-6 mb-8'>

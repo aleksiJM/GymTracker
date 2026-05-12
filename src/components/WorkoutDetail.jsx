@@ -8,8 +8,8 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog'
-import { ChevronLeft } from 'lucide-react'
 import Header from './Header'
+import { QueryClient, useQueryClient } from '@tanstack/react-query'
 
 export default function WorkoutDetail({ workout, onClose, onDelete }) {
   const lastWorkout = useRef(null)
@@ -23,6 +23,8 @@ export default function WorkoutDetail({ workout, onClose, onDelete }) {
   }, [workout])
 
   const displayed = workout || lastWorkout.current
+
+  const queryClient = useQueryClient()
 
   const handleDelete = async () => {
     if (!displayed) return
@@ -38,6 +40,7 @@ export default function WorkoutDetail({ workout, onClose, onDelete }) {
       return
     }
 
+    queryClient.invalidateQueries({ queryKey: ['workouts'] })
     setShowConfirm(false)
     setDeleting(false)
     onDelete(displayed.id)

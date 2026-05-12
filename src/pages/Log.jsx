@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { fetchWorkouts, fetchBodyweight } from '@/lib/queries'
 import { supabase } from '../lib/supabase'
 import ActiveWorkout from '../components/ActiveWorkout'
 import { Button } from '@/components/ui/button'
@@ -12,50 +14,27 @@ import {
 import { ChevronRight } from 'lucide-react'
 
 export default function Log() {
+  const queryClient = useQueryClient()
   const [activeWorkout, setActiveWorkout] = useState(null)
   const [showNameModal, setShowNameModal] = useState(false)
   const [newWorkoutName, setNewWorkoutName] = useState('')
-  const [recentWorkouts, setRecentWorkouts] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [bodyweight, setBodyweight] = useState('')
+  const [bodyweightInput, setBodyweightInput] = useState('')
   const [saving, setSaving] = useState(false)
 
-  useEffect(() => {
-    const fetchWorkouts = async () => {
-      const { data, error } = await supabase
-        .from('workouts')
-        .select(
-          `
-          *,
-          exercises (
-            *,
-            sets (*),
-            exercise_muscles (*)
-          )
-        `
-        )
-        .order('created_at', { ascending: false })
-        .limit(8)
+  const { data: workouts = [], isLoading: workoutsLoading } = useQuery({
+    queryKey: ['workouts'],
+    queryFn: fetchWorkouts,
+  })
 
-      if (error) console.error(error)
-      else setRecentWorkouts(data)
-      setLoading(false)
-    }
-
-    const fetchBodyweight = async () => {
-      const { data, error } = await supabase
-        .from('bodyweight')
-        .select('weight')
-        .order('created_at', { ascending: false })
-        .limit(1)
-
-      if (!error && data && data.length > 0)
-        setBodyweight(String(data[0].weight))
-    }
-
-    fetchWorkouts()
-    fetchBodyweight()
-  }, [])
+  const { data: bodyweightData = [] } = useQuery({
+    queryKey: ['bodyweight'],
+    queryFn: fetchBodyweight,
+    onSuccess: (data) => {
+      if (data.length > 0 && !bodyweightInput) {
+        setBodyweightInput(String(data[0].weight))
+      }
+    },
+  })
 
   const startNew = () => {
     if (!newWorkoutName.trim()) return
@@ -137,18 +116,12 @@ export default function Log() {
       }
     }
 
-    const { data: updatedWorkouts } = await supabase
-      .from('workouts')
-      .select(`*, exercises (*, sets (*), exercise_muscles (*))`)
-      .order('created_at', { ascending: false })
-      .limit(8)
-
-    if (updatedWorkouts) setRecentWorkouts(updatedWorkouts)
+    queryClient.invalidateQueries({ queryKey: ['workouts'] })
     setActiveWorkout(null)
   }
 
   const handleSaveBodyweight = async () => {
-    if (!bodyweight) return
+    if (!bodyweightInput) return
     setSaving(true)
 
     const {
@@ -157,7 +130,7 @@ export default function Log() {
 
     const { error } = await supabase
       .from('bodyweight')
-      .insert({ weight: parseFloat(bodyweight), user_id: user.id })
+      .insert({ weight: parseFloat(bodyweightInput), user_id: user.id })
 
     if (error) {
       console.error(error)
@@ -165,10 +138,12 @@ export default function Log() {
       return
     }
 
+    queryClient.invalidateQueries({ queryKey: ['bodyweight'] })
     setSaving(false)
   }
 
-  if (loading) return
+  if (workoutsLoading)
+    return <div className='p-6 text-muted-foreground'>Loading...</div>
 
   return (
     <>
@@ -187,8 +162,9 @@ export default function Log() {
           <Input
             type='number'
             placeholder='e.g. 80.0'
-            value={bodyweight}
-            onChange={(e) => setBodyweight(e.target.value)}
+            value={bodyweightInput}
+            onChange={(e) => setBodyweightInput(e.target.value)}
+            onFocus={(e) => e.target.select()}
             className='bg-secondary border-border text-foreground flex-1 text-center'
           />
           <Button
@@ -215,12 +191,12 @@ export default function Log() {
           Repeat previous
         </p>
 
-        {recentWorkouts.length === 0 ? (
+        {workouts.length === 0 ? (
           <p className='text-sm text-muted-foreground'>
             No previous workouts yet
           </p>
         ) : (
-          recentWorkouts.map((workout) => (
+          workouts.map((workout) => (
             <div
               key={workout.id}
               className='bg-card border border-border rounded-xl px-4 py-3 mb-2 cursor-pointer hover:bg-secondary active:scale-95 transition-all duration-100 select-none'
@@ -242,39 +218,37 @@ export default function Log() {
         )}
       </div>
 
-      {showNameModal && (
-        <Dialog open={showNameModal} onOpenChange={setShowNameModal}>
-          <DialogContent className='bg-card border-border max-w-[400px]'>
-            <DialogHeader>
-              <DialogTitle className='text-foreground'>New workout</DialogTitle>
-            </DialogHeader>
-            <Input
-              type='text'
-              placeholder='e.g. Push day'
-              value={newWorkoutName}
-              onChange={(e) => setNewWorkoutName(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && startNew()}
-              className='bg-secondary border-border text-foreground'
-              autoFocus
-            />
-            <div className='grid grid-cols-2 gap-3'>
-              <Button
-                variant='outline'
-                className='border-border text-muted-foreground cursor-pointer'
-                onClick={() => setShowNameModal(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                className='bg-primary text-primary-foreground cursor-pointer hover:opacity-90'
-                onClick={startNew}
-              >
-                Start
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
+      <Dialog open={showNameModal} onOpenChange={setShowNameModal}>
+        <DialogContent className='bg-card border-border max-w-[400px]'>
+          <DialogHeader>
+            <DialogTitle className='text-foreground'>New workout</DialogTitle>
+          </DialogHeader>
+          <Input
+            type='text'
+            placeholder='e.g. Push day'
+            value={newWorkoutName}
+            onChange={(e) => setNewWorkoutName(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && startNew()}
+            className='bg-secondary border-border text-foreground'
+            autoFocus
+          />
+          <div className='grid grid-cols-2 gap-3'>
+            <Button
+              variant='outline'
+              className='border-border text-muted-foreground cursor-pointer'
+              onClick={() => setShowNameModal(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              className='bg-primary text-primary-foreground cursor-pointer hover:opacity-90'
+              onClick={startNew}
+            >
+              Start
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <ActiveWorkout
         workoutName={activeWorkout?.name ?? ''}

@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
-import { supabase } from '../lib/supabase'
+import { useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { fetchBodyweight, fetchWorkouts } from '@/lib/queries'
 import WorkoutCard from '../components/WorkoutCard'
 import WorkoutDetail from '../components/WorkoutDetail'
 import { Card, CardContent } from '@/components/ui/card'
@@ -8,95 +9,67 @@ import Settings from '@/components/Settings'
 import { Button } from '@base-ui/react'
 
 export default function Home() {
-  const [workouts, setWorkouts] = useState([])
   const [selectedWorkout, setSelectedWorkout] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [bodyweightChange, setBodyweightChange] = useState(null)
   const [bodyweightView, setBodyweightView] = useState('week')
-  const [showSettings, setShowSettigs] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
 
-  const handleDelete = (deletedId) => {
-    setWorkouts((prev) => prev.filter((w) => w.id !== deletedId))
+  const { data: workouts = [], isLoading: workoutsLoading } = useQuery({
+    queryKey: ['workouts'],
+    queryFn: fetchWorkouts,
+  })
+
+  const { data: bodyweightData = [] } = useQuery({
+    queryKey: ['bodyweight'],
+    queryFn: fetchBodyweight,
+  })
+
+  const bodyweightChange = (() => {
+    if (bodyweightData.length === 0) return null
+    const now = new Date()
+    const oneWeekAgo = new Date()
+    const oneMonthAgo = new Date()
+    oneWeekAgo.setDate(now.getDate() - 7)
+    oneMonthAgo.setDate(now.getDate() - 30)
+
+    const avg = (arr) => arr.reduce((sum, b) => sum + b.weight, 0) / arr.length
+    const allTimeChange = parseFloat(
+      (
+        bodyweightData[0].weight -
+        bodyweightData[bodyweightData.length - 1].weight
+      ).toFixed(1)
+    )
+
+    const lastWeekData = bodyweightData.filter(
+      (b) => new Date(b.created_at) >= oneWeekAgo
+    )
+    const beforeLastWeek = bodyweightData.filter(
+      (b) => new Date(b.created_at) < oneWeekAgo
+    )
+    const weekChange =
+      lastWeekData.length > 0 && beforeLastWeek.length > 0
+        ? parseFloat((avg(lastWeekData) - avg(beforeLastWeek)).toFixed(1))
+        : allTimeChange
+
+    const lastMonthData = bodyweightData.filter(
+      (b) => new Date(b.created_at) >= oneMonthAgo
+    )
+    const beforeLastMonth = bodyweightData.filter(
+      (b) => new Date(b.created_at) < oneMonthAgo
+    )
+    const monthChange =
+      lastMonthData.length > 0 && beforeLastMonth.length > 0
+        ? parseFloat((avg(lastMonthData) - avg(beforeLastMonth)).toFixed(1))
+        : allTimeChange
+
+    return { week: weekChange, month: monthChange, allTime: allTimeChange }
+  })()
+
+  const queryClient = useQueryClient()
+
+  const handleDelete = async () => {
+    queryClient.invalidateQueries({ queryKey: ['workouts'] })
+    setSelectedWorkout(null)
   }
-
-  useEffect(() => {
-    const fetchWorkouts = async () => {
-      const { data, error } = await supabase
-        .from('workouts')
-        .select(
-          `
-          *,
-          exercises (
-            *,
-            sets (*),
-            exercise_muscles (*)
-          )
-        `
-        )
-        .order('created_at', { ascending: false })
-
-      if (error) console.error(error)
-      else setWorkouts(data)
-      setLoading(false)
-    }
-
-    const fetchBodyweight = async () => {
-      const { data, error } = await supabase
-        .from('bodyweight')
-        .select('weight, created_at')
-        .order('created_at', { ascending: true })
-
-      if (!error && data && data.length > 0) {
-        const now = new Date()
-        const oneWeekAgo = new Date()
-        const oneMonthAgo = new Date()
-        oneWeekAgo.setDate(now.getDate() - 7)
-        oneMonthAgo.setDate(now.getDate() - 30)
-
-        const avg = (arr) =>
-          arr.reduce((sum, b) => sum + b.weight, 0) / arr.length
-
-        const allTimeChange = parseFloat(
-          (data[data.length - 1].weight - data[0].weight).toFixed(1)
-        )
-
-        const lastWeekData = data.filter(
-          (b) => new Date(b.created_at) >= oneWeekAgo
-        )
-        const beforeLastWeek = data.filter(
-          (b) => new Date(b.created_at) < oneWeekAgo
-        )
-        const weekChange =
-          lastWeekData.length > 0 && beforeLastWeek.length > 0
-            ? parseFloat((avg(lastWeekData) - avg(beforeLastWeek)).toFixed(1))
-            : allTimeChange
-
-        const lastMonthData = data.filter(
-          (b) => new Date(b.created_at) >= oneMonthAgo
-        )
-        const beforeLastMonth = data.filter(
-          (b) => new Date(b.created_at) < oneMonthAgo
-        )
-        const monthChange =
-          lastMonthData.length > 0 && beforeLastMonth.length > 0
-            ? parseFloat((avg(lastMonthData) - avg(beforeLastMonth)).toFixed(1))
-            : allTimeChange
-
-        setBodyweightChange({
-          month: monthChange,
-          week: weekChange,
-          allTime: allTimeChange,
-        })
-      } else {
-        setBodyweightChange({ month: 0, week: 0, allTime: 0 })
-      }
-    }
-
-    fetchWorkouts()
-    fetchBodyweight()
-  }, [])
-
-  if (loading) return
 
   return (
     <>
@@ -107,7 +80,7 @@ export default function Home() {
           </h1>
           <Button
             className='text-muted-foreground hover:text-foreground cursor-pointer mt-1'
-            onClick={() => setShowSettigs(true)}
+            onClick={() => setShowSettings(true)}
           >
             <Menu size={25}></Menu>
           </Button>
@@ -193,7 +166,7 @@ export default function Home() {
         onDelete={handleDelete}
       />
 
-      <Settings isOpen={showSettings} onClose={() => setShowSettigs(false)} />
+      <Settings isOpen={showSettings} onClose={() => setShowSettings(false)} />
     </>
   )
 }
