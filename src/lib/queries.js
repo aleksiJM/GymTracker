@@ -23,7 +23,7 @@ export const fetchBodyweight = async () => {
   const { data, error } = await supabase
     .from('bodyweight')
     .select('weight, created_at')
-    .order('created_at', { ascending: false })
+    .order('created_at', { ascending: true })
 
   if (error) throw error
   return data

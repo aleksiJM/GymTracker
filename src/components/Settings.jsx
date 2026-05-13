@@ -37,6 +37,11 @@ export default function Settings({ isOpen, onClose }) {
     localStorage.setItem('units', units)
   }, [units])
 
+  useEffect(() => {
+    localStorage.setItem('mode', mode)
+    window.dispatchEvent(new CustomEvent('phaseModeChange', { detail: mode }))
+  }, [mode])
+
   return (
     <div
       className={`fixed top-0 left-1/2 w-full max-w-[430px] h-screen bg-card z-50 flex flex-col transition-transform duration-300

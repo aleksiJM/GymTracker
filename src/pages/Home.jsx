@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { fetchBodyweight, fetchWorkouts } from '@/lib/queries'
 import WorkoutCard from '../components/WorkoutCard'
@@ -12,6 +12,15 @@ export default function Home() {
   const [selectedWorkout, setSelectedWorkout] = useState(null)
   const [bodyweightView, setBodyweightView] = useState('week')
   const [showSettings, setShowSettings] = useState(false)
+  const [phaseMode, setPhaseMode] = useState(
+    () => localStorage.getItem('mode') || 'gain'
+  )
+
+  useEffect(() => {
+    const onPhaseMode = (e) => setPhaseMode(e.detail)
+    window.addEventListener('phaseModeChange', onPhaseMode)
+    return () => window.removeEventListener('phaseModeChange', onPhaseMode)
+  }, [])
 
   const { data: workouts = [], isLoading: workoutsLoading } = useQuery({
     queryKey: ['workouts'],
@@ -34,8 +43,8 @@ export default function Home() {
     const avg = (arr) => arr.reduce((sum, b) => sum + b.weight, 0) / arr.length
     const allTimeChange = parseFloat(
       (
-        bodyweightData[0].weight -
-        bodyweightData[bodyweightData.length - 1].weight
+        bodyweightData[bodyweightData.length - 1].weight -
+        bodyweightData[0].weight
       ).toFixed(1)
     )
 
@@ -62,6 +71,14 @@ export default function Home() {
         : allTimeChange
 
     return { week: weekChange, month: monthChange, allTime: allTimeChange }
+  })()
+
+  const bwDelta = bodyweightChange?.[bodyweightView]
+  const bodyweightDeltaClass = (() => {
+    if (bwDelta === undefined || bwDelta === null) return ''
+    if (bwDelta === 0) return 'text-muted-foreground'
+    const good = phaseMode === 'gain' ? bwDelta > 0 : bwDelta < 0
+    return good ? 'text-positive' : 'text-destructive'
   })()
 
   const queryClient = useQueryClient()
@@ -118,7 +135,7 @@ export default function Home() {
               {bodyweightChange !== null ? (
                 <>
                   <div
-                    className={`text-[1.375rem] font-medium ${bodyweightChange[bodyweightView] <= 0 ? 'text-primary' : 'text-destructive'}`}
+                    className={`text-[1.375rem] font-medium ${bodyweightDeltaClass}`}
                   >
                     {bodyweightChange[bodyweightView] > 0 ? '+ ' : '- '}
                     {Math.abs(bodyweightChange[bodyweightView]).toFixed(1)} kg
@@ -134,7 +151,9 @@ export default function Home() {
                 </>
               ) : (
                 <>
-                  <div className='text-base text-muted-foreground'>No data</div>
+                  <div className='text-[1.375rem] font-medium text-muted-foreground'>
+                    No data
+                  </div>
                   <div className='text-xs text-muted-foreground mt-1'>
                     Bodyweight change
                   </div>
