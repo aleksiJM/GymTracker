@@ -23,7 +23,7 @@ export default function WorkoutCard({ workout, onClick }: WorkoutCardProps) {
 
   return (
     <article
-      className='bg-card border border-border rounded-xl px-4 py-3 mb-2 cursor-pointer hover:bg-secondary transition-colors active:scale-97 transition-all duration-100 select-none'
+      className='bg-card border border-border rounded-xl px-4 py-3 mb-2 cursor-pointer hover:bg-secondary transition-colors active:scale-97 duration-100 select-none'
       onClick={onClick}
     >
       <div className='flex justify-between items-start'>

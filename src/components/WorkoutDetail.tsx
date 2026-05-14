@@ -74,8 +74,8 @@ export default function WorkoutDetail({
   return (
     <>
       <div
-        className={`fixed top-0 left-1/2 w-full max-w-[430px] h-screen bg-card z-50 overflow-y-auto transition-transform duration-300
-          ${workout ? '-translate-x-1/2' : 'translate-x-[calc(-50%+100%)]'}`}
+        className={`fixed top-0 left-1/2 w-full max-w-107.5 h-screen bg-card z-50 overflow-y-auto transition-transform duration-300
+          ${workout ? '-translate-x-1/2' : 'translate-x-[50%]'}`}
       >
         <Header title={displayed?.name ?? ''} onClose={onClose} />
 
@@ -137,7 +137,7 @@ export default function WorkoutDetail({
 
       {displayed && (
         <Dialog open={showConfirm}>
-          <DialogContent className='max-w-[400px] bg-card border-border'>
+          <DialogContent className='max-w-100 bg-card border-border'>
             <DialogHeader>
               <DialogTitle className='text-foreground'>
                 Delete workout?

@@ -54,8 +54,8 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 
   return (
     <div
-      className={`fixed top-0 left-1/2 w-full max-w-[430px] h-screen bg-card z-50 flex flex-col transition-transform duration-300
-                ${isOpen ? '-translate-x-1/2' : 'translate-x-[calc(-50%+100%)]'}`}
+      className={`fixed top-0 left-1/2 w-full max-w-107.5 h-screen bg-card z-50 flex flex-col transition-transform duration-300
+                ${isOpen ? '-translate-x-1/2' : 'translate-x-[50%]'}`}
     >
       <Header title={'Settings'} onClose={onClose} />
 

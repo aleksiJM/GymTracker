@@ -36,7 +36,7 @@ export default function SignIn() {
 
   return (
     <div className='min-h-screen bg-background flex items-center justify-center px-6'>
-      <div className='w-full max-w-[380px]'>
+      <div className='w-full max-w-95'>
         <div className='mb-8'>
           <h1 className='text-2xl font-medium text-foreground mb-1'>
             {mode === 'signin' ? 'Welcome back' : 'Create account'}

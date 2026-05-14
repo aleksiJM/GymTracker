@@ -16,7 +16,7 @@ export default function App() {
   if (!user) return <SignIn />
 
   return (
-    <div className='max-w-[430px] mx-auto min-h-screen bg-card relative'>
+    <div className='max-w-107.5 mx-auto min-h-screen bg-card relative'>
       <main className='pb-16'>
         {page === 'home' && <Home />}
         {page === 'log' && <Log />}

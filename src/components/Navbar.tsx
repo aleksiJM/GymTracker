@@ -14,7 +14,7 @@ interface NavbarProps {
 
 export default function Navbar({ currentPage, setPage }: NavbarProps) {
   return (
-    <nav className='fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-card border-t border-border flex'>
+    <nav className='fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-107.5 bg-card border-t border-border flex'>
       {tabs.map(({ id, icon: Icon }) => (
         <button
           key={id}

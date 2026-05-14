@@ -256,7 +256,7 @@ export default function ExercisePicker({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className='bg-card border-border max-w-[400px] max-h-[80vh] flex flex-col'>
+      <DialogContent className='bg-card border-border max-w-100 max-h-[80vh] flex flex-col'>
         <DialogHeader>
           <DialogTitle className='text-foreground'>Add exercise</DialogTitle>
         </DialogHeader>

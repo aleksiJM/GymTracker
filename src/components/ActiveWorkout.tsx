@@ -73,7 +73,7 @@ function ExerciseBlock({ exercise, onChange, onRemove }: ExerciseBlockProps) {
       <div className='flex justify-between items-center'>
         <div className='flex justify-between items-center'>
           <div
-            className='flex items-center gap-2 cursor-pointer flex-grow'
+            className='flex items-center gap-2 cursor-pointer grow'
             onClick={() => setIsOpen(!isOpen)}
           >
             <ChevronRight
@@ -229,8 +229,8 @@ export default function ActiveWorkout({
 
   return (
     <div
-      className={`fixed top-0 left-1/2 w-full max-w-[430px] h-[100dvh] bg-card z-50 flex flex-col transition-transform duration-300
-        ${isOpen ? '-translate-x-1/2' : 'translate-x-[calc(-50%+100%)]'}`}
+      className={`fixed top-0 left-1/2 w-full max-w-107.5 h-dvh bg-card z-50 flex flex-col transition-transform duration-300
+        ${isOpen ? '-translate-x-1/2' : 'translate-x-[50%]'}`}
     >
       <Header title={workoutName} onClose={onCancel} />
 

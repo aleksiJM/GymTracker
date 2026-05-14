@@ -248,7 +248,7 @@ export default function Log() {
       </div>
 
       <Dialog open={showNameModal} onOpenChange={setShowNameModal}>
-        <DialogContent className='bg-card border-border max-w-[400px]'>
+        <DialogContent className='bg-card border-border max-w-100'>
           <DialogHeader>
             <DialogTitle className='text-foreground'>New workout</DialogTitle>
           </DialogHeader>
