@@ -4,6 +4,12 @@ import './style.css'
 import App from './App'
 import { AuthProvider } from './lib/AuthContext'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import * as Sentry from '@sentry/react'
+
+Sentry.init({
+  dsn: 'https://bf5594bf1ba8ce6e430d29b6276bf712@o4511389790896128.ingest.de.sentry.io/4511389801447504',
+  sendDefaultPii: true,
+})
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -19,7 +25,9 @@ if (savedTheme === 'dark') {
   document.documentElement.classList.add('dark')
 }
 
-createRoot(document.getElementById('root')!).render(
+const container = document.getElementById('root')!
+const root = createRoot(container)
+root.render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
