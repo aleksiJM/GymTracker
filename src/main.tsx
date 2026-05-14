@@ -4,10 +4,11 @@ import './style.css'
 import App from './App'
 import { AuthProvider } from './lib/AuthContext'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import '../instrument'
 import * as Sentry from '@sentry/react'
 
 Sentry.init({
-  dsn: 'https://bf5594bf1ba8ce6e430d29b6276bf712@o4511389790896128.ingest.de.sentry.io/4511389801447504',
+  dsn: import.meta.env.VITE_SENTRY_DSN,
   sendDefaultPii: true,
 })
 
@@ -26,7 +27,13 @@ if (savedTheme === 'dark') {
 }
 
 const container = document.getElementById('root')!
-const root = createRoot(container)
+const root = createRoot(container, {
+  onUncaughtError: Sentry.reactErrorHandler((error, errorInfo) => {
+    console.warn('Uncaught error', error, errorInfo.componentStack)
+  }),
+  onCaughtError: Sentry.reactErrorHandler(),
+  onRecoverableError: Sentry.reactErrorHandler(),
+})
 root.render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
