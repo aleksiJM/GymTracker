@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import ExercisePicker from './ExercisePicker'
@@ -11,6 +11,8 @@ import type {
   ExerciseLibraryRow,
   MuscleDraft,
 } from '@/types/workout'
+
+const STORAGE_KEY = 'activeWorkout'
 
 type ExerciseBlockProps = {
   exercise: DraftExercise
@@ -186,13 +188,38 @@ export default function ActiveWorkout({
 }: ActiveWorkoutProps) {
   const [exercises, setExercises] = useState<DraftExercise[]>(initialExercises)
   const [showPicker, setShowPicker] = useState(false)
+  const lastWorkoutName = useRef(workoutName)
+
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved)
+        if (parsed.name && parsed.exercises) {
+          lastWorkoutName.current = parsed.name
+          setExercises(parsed.exercises)
+        }
+      } catch {
+        localStorage.removeItem(STORAGE_KEY)
+      }
+    }
+  }, [])
 
   useEffect(() => {
     if (!isOpen) return
+    lastWorkoutName.current = workoutName
     queueMicrotask(() => {
       setExercises(initialExercises)
     })
-  }, [isOpen, initialExercises])
+  }, [isOpen, initialExercises, workoutName])
+
+  useEffect(() => {
+    if (!isOpen) return
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ name: lastWorkoutName.current, exercises })
+    )
+  }, [exercises, isOpen])
 
   const addExercise = (libraryExercise: ExerciseLibraryRow) => {
     const newExercise: DraftExercise = {
@@ -224,7 +251,13 @@ export default function ActiveWorkout({
         weight: parseFloat(s.weight) || 0,
       })),
     }))
-    onSave({ name: workoutName, exercises: cleaned })
+    localStorage.removeItem(STORAGE_KEY)
+    onSave({ name: lastWorkoutName.current, exercises: cleaned })
+  }
+
+  const handleCancel = () => {
+    localStorage.removeItem(STORAGE_KEY)
+    onCancel()
   }
 
   return (
@@ -232,7 +265,7 @@ export default function ActiveWorkout({
       className={`fixed top-0 left-1/2 w-full max-w-107.5 h-dvh bg-card z-50 flex flex-col transition-transform duration-300
         ${isOpen ? '-translate-x-1/2' : 'translate-x-[50%]'}`}
     >
-      <Header title={workoutName} onClose={onCancel} />
+      <Header title={lastWorkoutName.current} onClose={handleCancel} />
 
       <div className='flex-1 overflow-y-auto px-6 py-4'>
         {exercises.map((exercise, index) => (
