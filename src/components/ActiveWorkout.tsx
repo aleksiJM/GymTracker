@@ -199,7 +199,7 @@ export default function ActiveWorkout({
           lastWorkoutName.current = parsed.name
           setExercises(parsed.exercises)
         }
-      } catch (_e) {
+      } catch {
         localStorage.removeItem(STORAGE_KEY)
       }
     }
@@ -211,7 +211,7 @@ export default function ActiveWorkout({
     queueMicrotask(() => {
       setExercises(initialExercises)
     })
-  }, [isOpen, initialExercises])
+  }, [isOpen, initialExercises, workoutName])
 
   useEffect(() => {
     if (!isOpen) return
