@@ -28,6 +28,37 @@ export default function Log() {
   const [newWorkoutName, setNewWorkoutName] = useState('')
   const [bodyweightInput, setBodyweightInput] = useState('')
   const [saving, setSaving] = useState(false)
+  const [showResumeDialog, setShowResumeDialog] = useState(false)
+  const [savedWorkoutName, setSavedWorkoutName] = useState('')
+
+  useEffect(() => {
+    const saved = localStorage.getItem('activeWorkout')
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved)
+        if (parsed.name && parsed.exercises) {
+          setSavedWorkoutName(parsed.name)
+          setShowResumeDialog(true)
+        }
+      } catch {
+        localStorage.removeItem('activeWorkout')
+      }
+    }
+  }, [])
+
+  const handleResume = () => {
+    const saved = localStorage.getItem('activeWorkout')
+    if (saved) {
+      const parsed = JSON.parse(saved)
+      setActiveWorkout({ name: parsed.name, exercises: parsed.exercises })
+    }
+    setShowResumeDialog(false)
+  }
+
+  const handleDiscard = () => {
+    localStorage.removeItem('activeWorkout')
+    setShowResumeDialog(false)
+  }
 
   const { data: workouts = [] } = useQuery({
     queryKey: ['workouts'],
@@ -283,6 +314,38 @@ export default function Log() {
         onCancel={() => setActiveWorkout(null)}
         isOpen={!!activeWorkout}
       />
+
+      <Dialog open={showResumeDialog} onOpenChange={setShowResumeDialog}>
+        <DialogContent className='bg-card border-border max-w-100'>
+          <DialogHeader>
+            <DialogTitle className='text-foreground'>
+              Resume workout?
+            </DialogTitle>
+          </DialogHeader>
+          <p className='text-sm text-muted-foreground'>
+            You have an unfinished workout —{' '}
+            <span className='text-foreground font-medium'>
+              {savedWorkoutName}
+            </span>
+            . Would you like to continue where you left off?
+          </p>
+          <div className='grid grid-cols-2 gap-3'>
+            <Button
+              variant='outline'
+              className='border-destructive text-destructive hover:bg-destructive/10'
+              onClick={handleDiscard}
+            >
+              Discard
+            </Button>
+            <Button
+              className='bg-primary text-primary-foreground hover:opacity-90'
+              onClick={handleResume}
+            >
+              Continue
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

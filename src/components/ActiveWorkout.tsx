@@ -191,21 +191,6 @@ export default function ActiveWorkout({
   const lastWorkoutName = useRef(workoutName)
 
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved)
-        if (parsed.name && parsed.exercises) {
-          lastWorkoutName.current = parsed.name
-          setExercises(parsed.exercises)
-        }
-      } catch {
-        localStorage.removeItem(STORAGE_KEY)
-      }
-    }
-  }, [])
-
-  useEffect(() => {
     if (!isOpen) return
     lastWorkoutName.current = workoutName
     queueMicrotask(() => {
