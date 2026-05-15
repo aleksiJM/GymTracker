@@ -29,7 +29,7 @@ export default function Log() {
   const [bodyweightInput, setBodyweightInput] = useState('')
   const [saving, setSaving] = useState(false)
 
-  const { data: workouts = [], isLoading: workoutsLoading } = useQuery({
+  const { data: workouts = [] } = useQuery({
     queryKey: ['workouts'],
     queryFn: fetchWorkouts,
   })
@@ -168,9 +168,6 @@ export default function Log() {
     queryClient.invalidateQueries({ queryKey: ['bodyweight'] })
     setSaving(false)
   }
-
-  if (workoutsLoading)
-    return <div className='p-6 text-muted-foreground'>Loading...</div>
 
   const typedWorkouts = workouts as WorkoutWithRelations[]
 
